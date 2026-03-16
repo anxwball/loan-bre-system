@@ -1,6 +1,6 @@
 # Loan BRE System
 
-Sistema de evaluación de solicitudes de préstamos construido alrededor de un **Business Rules Engine (BRE)**. El proyecto está en desarrollo activo y actualmente cubre la fase de exploración y preprocesamiento de datos (EDA).
+Proyecto personal-didáctico de evaluación de solicitudes de préstamos construido alrededor de un **Business Rules Engine (BRE)**. El proyecto está en desarrollo activo y actualmente cubre la fase de exploración y preprocesamiento de datos (EDA).
 
 La base de este trabajo utiliza el dataset de Kaggle **Loan Prediction Problem Dataset**, y el análisis actual está construido sobre esa referencia.
 
@@ -24,10 +24,10 @@ loan-bre-system/
 ├── data/
 │   ├── raw/               # Dataset original sin modificar
 │   └── processed/         # Datos limpios con feature engineering aplicado
-│                          # Incluye versiones por corrida (timestamp)
+│                          # Incluye un dataset base trackeado y versiones por ejecución generadas localmente
 ├── graphs/
-│   ├── latest/            # Gráficos de la última corrida (acceso rápido)
-│   └── YYYYMMDD_HHMMSS/   # Gráficos versionados por corrida
+│   ├── latest/            # Gráficos de la última ejecución (acceso rápido)
+│   └── YYYYMMDD_HHMMSS/   # Gráficos versionados por ejecución
 ├── notebooks/
 │   └── eda_analysis.py    # Pipeline de EDA y visualizaciones
 ├── src/
@@ -47,6 +47,11 @@ loan-bre-system/
 - Plataforma: **Kaggle**
 - Uso en este proyecto: dataset base para exploración, limpieza y generación de variables iniciales
 
+### Alcance actual
+
+- Incluye: EDA, limpieza, generación de variables iniciales y visualización reproducible
+- No incluye aún: decisión final del BRE ni modelo de reglas determinista completo
+
 ### Pipeline de datos
 
 El pipeline ejecuta las siguientes etapas en orden:
@@ -55,8 +60,8 @@ El pipeline ejecuta las siguientes etapas en orden:
 2. **Inspección**: dimensiones del dataset, tipos de columnas y reporte de valores nulos.
 3. **Limpieza**: imputación por moda en variables categóricas, por mediana en numéricas.
 4. **Feature engineering**: genera `total_income` (ingreso del solicitante + co-solicitante) y `loan_to_income_ratio` (ratio préstamo/ingreso total).
-5. **Guardado con versionado**: guarda tanto una versión `latest` como una versión estampada con timestamp por corrida.
-6. **Visualización**: 5 gráficos exportados a `graphs/latest/` y a la carpeta de la corrida activa.
+5. **Guardado con versionado**: guarda tanto una versión `latest` como una versión estampada con timestamp por ejecución (artefacto local de ejecución).
+6. **Visualización**: 5 gráficos exportados a `graphs/latest/` y a la carpeta de la ejecución activa.
 
 ### Visualizaciones generadas
 
@@ -107,9 +112,10 @@ La primera ejecución procesa desde el raw y guarda los artefactos. Las ejecucio
 
 ## Próximos pasos
 
-- Modelado del dominio del BRE con reglas deterministas y trazables
-- Definición del estatus de aprobación basado en múltiples variables
-- Tests unitarios del motor de reglas
+- Definir un estatus de aprobación determinista con múltiples variables e invariantes del dominio
+- Diseñar las primeras reglas del BRE con criterios explícitos y trazables
+- Incorporar pruebas unitarias para validar el flujo de decisión
+- Refinar el pipeline para soportar nuevas iteraciones del motor de reglas
 
 ---
 
