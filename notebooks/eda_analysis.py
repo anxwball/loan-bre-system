@@ -1,3 +1,10 @@
+"""Execute the EDA workflow for the loan dataset and generate chart artifacts.
+
+This script orchestrates dataset acquisition (processed-first fallback to raw),
+profiling, cleaning/feature-enrichment when needed, and batch export of plots to
+both versioned and latest graph directories.
+"""
+
 import matplotlib.pyplot as plt
 import seaborn as sns
 import pandas as pd
@@ -12,7 +19,6 @@ from src.data_loader import (
     save_processed_data
 )
 
-# Plot style configuration
 sns.set_theme(style="whitegrid", palette="muted")
 plt.rcParams['figure.figsize'] = (10, 5)
 plt.rcParams['font.size'] = 12
@@ -28,6 +34,16 @@ PROCESSED_DATA_PATH = "data/processed/loans_cleaned.csv"
 RAW_DATA_PATH = "data/raw/loans_data.csv"
 
 def run_eda():
+    """Run the end-to-end EDA pipeline and produce all visual outputs.
+
+    Flow:
+    - Attempt to load the latest processed dataset.
+    - If unavailable, load raw data, inspect, clean, engineer features, and persist.
+    - Generate and save all configured charts.
+
+    Returns:
+        None. Prints progress and writes files to disk.
+    """
     print("\nStarting EDA run...")
 
     dataset = load_processed_data(PROCESSED_DATA_PATH)
@@ -58,7 +74,15 @@ def run_eda():
     plot_all_charts(dataset)
 
 def plot_all_charts(dataset: pd.DataFrame) -> None:
-    # Generate all charts.
+    """Generate the full set of EDA charts for a prepared dataset.
+
+    Args:
+        dataset: DataFrame containing EDA-ready columns.
+
+    Returns:
+        None. Saves charts through `save_plot`.
+    """
+    # Generate charts in a fixed order for reproducible reporting.
     plot_target_distribution(dataset)
     plot_categorical_vs_target(dataset)
     plot_numerical_distributions(dataset)
@@ -66,7 +90,16 @@ def plot_all_charts(dataset: pd.DataFrame) -> None:
     plot_loan_to_income(dataset)
 
 def save_plot(filename: str, dpi: int = 300) -> None:
-    # Save a versioned chart and refresh the latest chart.
+    """Save the active Matplotlib figure to versioned and latest locations.
+
+    Args:
+        filename: Output file name for the chart image.
+        dpi: Export resolution in dots per inch.
+
+    Returns:
+        None. Writes image files and closes the current figure.
+    """
+    # Ensure both output directories exist before writing files.
     GRAPH_RUN_DIR.mkdir(parents=True, exist_ok=True)
     GRAPH_LATEST_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -80,14 +113,21 @@ def save_plot(filename: str, dpi: int = 300) -> None:
     print(f"Updated latest chart: {latest_file_path}")
 
 def plot_target_distribution(dataset: pd.DataFrame) -> None:
-    # Show approved vs denied applicant counts.
+    """Plot approval-status distribution with percentage labels.
+
+    Args:
+        dataset: DataFrame that includes the `loan_status` column.
+
+    Returns:
+        None. Renders and saves the chart.
+    """
     fig, ax = plt.subplots()
     counts = dataset['loan_status'].value_counts()
     color_map = {"Approved": "#4CAF50", "Denied": "#F44336"}
     colors = [color_map.get(label, "#999999") for label in counts.index]
     bars = ax.bar(counts.index, counts.values, color=colors, edgecolor="white", width=0.5)
 
-    # Add percentage labels above bars.
+    # Annotate percentages to make class balance immediately visible.
     total = counts.sum()
     for bar, val in zip(bars, counts.values):
         pct = f"{val/total*100:.1f}%"
@@ -101,10 +141,17 @@ def plot_target_distribution(dataset: pd.DataFrame) -> None:
     plt.show()
 
 def plot_categorical_vs_target(dataset: pd.DataFrame) -> None:
-    # Compare categorical features against loan status.
+    """Plot categorical-feature distributions segmented by loan status.
+
+    Args:
+        dataset: DataFrame containing candidate categorical columns and `loan_status`.
+
+    Returns:
+        None. Renders and saves a multi-panel chart, or exits if no features exist.
+    """
     categorical_features = ['gender', 'married', 'education', 'self_employed', 'property_area', 'credit_history']
 
-    # Keep only columns present in the current DataFrame.
+    # Filter unavailable features to keep the function robust across schema changes.
     categorical_features = [feature_name for feature_name in categorical_features if feature_name in dataset.columns]
 
     if not categorical_features:
@@ -153,7 +200,14 @@ def plot_categorical_vs_target(dataset: pd.DataFrame) -> None:
     plt.show()
 
 def plot_numerical_distributions(dataset: pd.DataFrame) -> None:
-    # Show distributions for core numeric features.
+    """Plot histogram and KDE distributions for core numeric variables.
+
+    Args:
+        dataset: DataFrame containing numeric EDA columns.
+
+    Returns:
+        None. Renders and saves the chart grid.
+    """
     numeric_features = ['applicantincome', 'loanamount', 'total_income', 'loan_to_income_ratio']
     numeric_features = [feature_name for feature_name in numeric_features if feature_name in dataset.columns]
 
@@ -171,7 +225,14 @@ def plot_numerical_distributions(dataset: pd.DataFrame) -> None:
     plt.show()
 
 def plot_correlation_heatmap(dataset: pd.DataFrame) -> None:
-    # Visualize pairwise correlations for numeric columns.
+    """Plot a correlation heatmap for numeric columns.
+
+    Args:
+        dataset: DataFrame with numeric columns to correlate.
+
+    Returns:
+        None. Renders and saves the heatmap.
+    """
     numeric_df = dataset.select_dtypes(include=["int64", "float64"])
     corr = numeric_df.corr()
 
@@ -183,9 +244,17 @@ def plot_correlation_heatmap(dataset: pd.DataFrame) -> None:
     plt.show()
 
 def plot_loan_to_income(dataset: pd.DataFrame) -> None:
-    # Compare loan-to-income ratio by loan status.
+    """Plot loan-to-income ratio distribution grouped by loan status.
+
+    Args:
+        dataset: DataFrame that should include `loan_to_income_ratio` and `loan_status`.
+
+    Returns:
+        None. Renders and saves the chart, or exits if required columns are missing.
+    """
 
     if 'loan_to_income_ratio' not in dataset.columns:
+        # Abort early when prerequisite feature is not available.
         print("Missing 'loan_to_income_ratio'. Skipping chart.")
         return
     

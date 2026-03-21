@@ -14,6 +14,12 @@ Best practices:
 - Type hints are required for parameters and return values.
 - Use section headers with `# === SECTION ===` in long modules.
 
+Documentation policy:
+- Add a module-level docstring before imports using a short executive-summary style.
+- Add technical docstrings to every public function and class (if present), including purpose, Args, and Returns.
+- Add only brief imperative comments for critical decisions or non-obvious logic; avoid obvious/basic comments.
+- Keep comments sparse so docstrings remain the primary documentation mechanism.
+
 Structure:
 - `src/` for reusable logic.
 - `notebooks/` for executable analysis scripts.

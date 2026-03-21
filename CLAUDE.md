@@ -23,3 +23,6 @@ Language convention:
 
 Operational rule:
 - Update `docs/context/10_session_history.md` at the end of each work session.
+
+Documentation rule:
+- Follow `docs/context/06_code_conventions.md` for module-level executive docstrings, technical docstrings on functions/classes, and sparse imperative critical comments.
