@@ -5,6 +5,23 @@
 
 ---
 
+## 0. Perfil del desarrollador
+
+> Esta sección existe para que Claude adapte explicaciones, decisiones de arquitectura y recomendaciones al contexto real del desarrollador.
+
+- **Rol actual:** Estudiante de Ingeniería en Sistemas, nivel Python básico→intermedio en progreso
+- **Camino técnico principal:** FullStack Software Engineering · Network Engineering · Ciberseguridad (Red Team)
+- **Camino secundario:** AI/ML · Automatización · Cloud/DevSecOps · Blue Team · Data Science
+- **Lenguaje principal:** Python — próximos: JavaScript, Java
+- **Certificaciones vigentes:** Cisco NetAcad — Network Technician, Switching/Routing/Wireless Essentials, Enterprise Networking Security & Automation
+- **Eje del roadmap de certs:** APIs (IBM API Fundamentals → Postman Student Expert → APIsec → AWS/GCloud → Kong/MuleSoft → TryHackMe Jr Pentester)
+- **Meta de portafolio:** API Security Scanner en Python (OWASP API Top 10 + CI/CD)
+
+**Cómo conecta este proyecto con esa meta:**
+Este BRE es el proyecto puente. La Fase 4 (FastAPI) produce una API real que luego puede ser objetivo del API Security Scanner — el mismo developer que construye la API aprende a atacarla. Eso es narrativa técnica de portafolio de alto valor.
+
+---
+
 ## 1. Identidad del proyecto
 
 **Nombre:** `loan-bre-system`
@@ -20,6 +37,8 @@
 - Empaquetado: `setuptools` con `pip install -e .` (editable install)
 
 **Fase actual:** Prototipo — Fase 1 completada / Fase 2 diseñada, pendiente de implementar
+
+**Posición estratégica:** Fase 4 (API REST) es la fase más importante para el roadmap del desarrollador — no es un bonus, es el objetivo principal del proyecto desde la perspectiva de portafolio.
 
 ---
 
@@ -228,6 +247,11 @@ rules_triggered (JSON), model_version
 ---
 
 ## Historial de sesiones
+
+### 2026-03-21
+- Se diseñó la arquitectura completa del proyecto en 4 fases y se estableció el stack técnico profesional.
+- Se implementó la Fase 1 completa: pipeline EDA con `data_loader.py`, 5 visualizaciones, empaquetado con `pyproject.toml`; primer commit y post de LinkedIn publicados.
+- Se diseñó la Fase 2 completa (BRE, reglas, engine, tests) con código listo para implementar, pendiente de ser ejecutada; se crearon historias de usuario, `CLAUDE.md` y se sincronizó el proyecto con el perfil técnico y roadmap de portafolio del desarrollador.
 
 ### 2025-03-17
 - Se diseñó la arquitectura completa del proyecto en 4 fases y se estableció el stack técnico profesional.
