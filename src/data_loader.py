@@ -5,15 +5,28 @@ input ingestion from CSV, null-profile inspection, deterministic cleaning,
 lightweight feature engineering, and version-aware persistence of processed data.
 """
 
+import json
+from datetime import datetime
 import pandas as pd
-import numpy as np
 from pathlib import Path
 
-def load_raw_data(csv_path: str) -> pd.DataFrame | None:
+LABELS_ROOT_PATH = Path("data/labels")
+LABELS_VERSIONS_PATH = LABELS_ROOT_PATH / "versions"
+LABELS_LATEST_PATH = LABELS_ROOT_PATH / "loan_labels_latest.csv"
+LEGACY_LABELS_PATH = Path("data/processed/loan_labels.csv")
+
+LABEL_VALUE_MAP = {
+    "Y": "Approved",
+    "N": "Denied",
+    "APPROVED": "Approved",
+    "DENIED": "Denied",
+}
+
+def load_raw_data(filepath: str) -> pd.DataFrame | None:
     """Load raw loan data from a CSV file.
 
     Args:
-        csv_path: Relative or absolute path to the raw CSV file.
+        filepath: Relative or absolute path to the raw CSV file.
 
     Returns:
         A DataFrame with raw records when the file is available and readable;
@@ -23,22 +36,22 @@ def load_raw_data(csv_path: str) -> pd.DataFrame | None:
         FileNotFoundError: Raised internally when the target path does not exist.
     """
     try:
-        if Path(csv_path).exists():
-            raw_df = pd.read_csv(csv_path)
+        if Path(filepath).exists():
+            raw_df = pd.read_csv(filepath)
             print(f"Loaded raw data: {raw_df.shape[0]} rows, {raw_df.shape[1]} columns.")
             return raw_df
         else:
-            raise FileNotFoundError(f"Missing file: {csv_path}")
+            raise FileNotFoundError(f"Missing file: {filepath}")
     except pd.errors.EmptyDataError:
         print("Input file is empty.")
     except Exception as e:
         print(f"Read error: {e}")
 
-def inspect_data(dataset: pd.DataFrame) -> None:
+def inspect_dataset(df: pd.DataFrame) -> None:
     """Print a compact structural and missing-value summary of a dataset.
 
     Args:
-        dataset: DataFrame to inspect.
+        df: DataFrame to inspect.
 
     Returns:
         None. Outputs summary information to stdout.
@@ -46,15 +59,26 @@ def inspect_data(dataset: pd.DataFrame) -> None:
     print("\n" + "="*50)
     print("Dataset overview")
     print("="*50)
-    dataset.info()
+    df.info()
 
     print("\n" + "="*50)
     print("Null values by column")
     print("="*50)
-    nulls = dataset.isnull().sum()
-    null_percent = ((nulls / len(dataset)) * 100).round(2)
+    nulls = df.isnull().sum()
+    null_percent = ((nulls / len(df)) * 100).round(2)
     null_summary = pd.DataFrame({'Null Count': nulls, 'Null Percentage': null_percent})
     print(null_summary[null_summary['Null Count'] > 0])
+
+def inspect_data(df: pd.DataFrame) -> None:
+    """Backward-compatible wrapper for dataset inspection.
+
+    Args:
+        df: DataFrame to inspect.
+
+    Returns:
+        None. Delegates to `inspect_dataset`.
+    """
+    inspect_dataset(df)
 
 def load_processed_data(csv_path: str) -> pd.DataFrame | None:
     """Load the latest available processed dataset.
@@ -88,7 +112,24 @@ def load_processed_data(csv_path: str) -> pd.DataFrame | None:
 
     return None
 
-def clean_data(dataset: pd.DataFrame) -> pd.DataFrame:
+def rename_columns(dataset: pd.DataFrame) -> pd.DataFrame:
+    """Rename specific legacy columns to canonical snake_case names.
+
+    Args:
+        dataset: DataFrame whose columns were already lowercased.
+
+    Returns:
+        A copy of the input DataFrame with selected columns renamed.
+    """
+    renamed_df = dataset.copy()
+    renamed_df = renamed_df.rename(columns={
+        "applicantincome": "applicant_income",
+        "coapplicantincome": "coapplicant_income",
+        "loanamount": "loan_amount",
+    })
+    return renamed_df
+
+def clean_data(df: pd.DataFrame) -> pd.DataFrame:
     """Standardize schema and impute missing values with simple statistics.
 
     Processing rules:
@@ -97,14 +138,14 @@ def clean_data(dataset: pd.DataFrame) -> pd.DataFrame:
     - Fill numeric nulls with the median of each column.
 
     Args:
-        dataset: Input DataFrame to clean.
+        df: Input DataFrame to clean.
 
     Returns:
         A cleaned copy of the input DataFrame.
     """
-    cleaned_df = dataset.copy()
+    cleaned_df = df.copy()
 
-    # Normalize column names before downstream feature references.
+    # Normalize column names before downstream transformations.
     cleaned_df.columns = [column_name.lower() for column_name in cleaned_df.columns]
 
     categorical_columns = cleaned_df.select_dtypes(include="object").columns.to_list()
@@ -125,37 +166,285 @@ def clean_data(dataset: pd.DataFrame) -> pd.DataFrame:
     print("\nCleaning complete. No missing values.")
     return cleaned_df
 
-def add_basic_features(dataset: pd.DataFrame) -> pd.DataFrame:
-    """Create derived features required for exploratory analysis.
+def split_labels(dataset: pd.DataFrame) -> pd.DataFrame:
+    """Separate benchmark labels from feature columns and persist label pairs.
 
-    Added columns:
-    - `total_income`: applicant + coapplicant income.
-    - `loan_to_income_ratio`: loan amount divided by total income (safe for zero income).
-    - `loan_status`: temporary proxy label based on credit history.
+    The function extracts `loan_id` and `loan_status` to a dedicated labels file
+    and returns a feature-only DataFrame without `loan_status`.
 
     Args:
-        dataset: Clean DataFrame used as the base for feature generation.
+        dataset: Cleaned DataFrame that includes the historical target label.
 
     Returns:
-        A new DataFrame containing the engineered features.
+        A copy of the input DataFrame without the `loan_status` column when the
+        label exists; otherwise an unchanged copy.
     """
-    featured_df = dataset.copy()
-    # Compute aggregate income first; reuse it for ratio calculation.
-    featured_df['total_income'] = featured_df['applicantincome'] + featured_df['coapplicantincome']
-    
-    featured_df['loan_to_income_ratio'] = np.where(
-        featured_df['total_income'] > 0, 
-        featured_df['loanamount'] / featured_df['total_income'], 
-        0
+    split_df = dataset.copy()
+
+    if "loan_status" not in split_df.columns:
+        print("No 'loan_status' column found. Skipping label split.")
+        return split_df
+
+    if "loan_id" not in split_df.columns:
+        print("No 'loan_id' column found. Skipping label split.")
+        return split_df
+
+    labels_df = split_df[["loan_id", "loan_status"]].copy()
+    normalized_labels_df = normalize_label_values(labels_df)
+    validation_report = validate_labels_integrity(normalized_labels_df)
+    coverage_report = validate_label_coverage(split_df[["loan_id"]].copy(), normalized_labels_df)
+
+    if validation_report["null_id_count"] > 0:
+        raise ValueError("Label integrity error: loan_id contains null values.")
+    if validation_report["duplicate_id_count"] > 0:
+        raise ValueError("Label integrity error: duplicate loan_id values detected.")
+    if validation_report["null_label_count"] > 0:
+        raise ValueError("Label integrity error: loan_status contains null values.")
+    if validation_report["invalid_label_count"] > 0:
+        raise ValueError("Label integrity error: loan_status contains values outside the approved dictionary.")
+
+    print(
+        "Label coverage: "
+        f"{coverage_report['matched_feature_rows']} of {coverage_report['feature_rows']} "
+        f"feature rows ({coverage_report['coverage_pct']:.2f}%)."
     )
 
-    # Keep this proxy label restricted to EDA scope.
-    featured_df['loan_status'] = np.where(featured_df['credit_history'] == 1, 'Approved', 'Denied')
-    
-    print("\nFeature engineering complete: total_income, loan_to_income_ratio.")
+    save_labels_data(
+        normalized_labels_df,
+        source="pipeline_split_labels",
+        owner="unassigned",
+        quality_notes="Generated from pipeline input dataset.",
+    )
+
+    feature_df = split_df.drop(columns=["loan_status"]).copy()
+    return feature_df
+
+
+def normalize_label_values(labels_df: pd.DataFrame) -> pd.DataFrame:
+    """Normalize raw label values into canonical business classes.
+
+    Accepted source values are `Y/N` or `Approved/Denied` in any case.
+
+    Args:
+        labels_df: DataFrame containing `loan_id` and `loan_status` columns.
+
+    Returns:
+        A normalized copy where `loan_status` uses canonical values.
+    """
+    normalized_df = labels_df.copy()
+
+    normalized_df["loan_id"] = normalized_df["loan_id"].astype("string").str.strip()
+    normalized_df["loan_status"] = normalized_df["loan_status"].astype("string").str.strip().str.upper()
+    normalized_df["loan_status"] = normalized_df["loan_status"].map(LABEL_VALUE_MAP)
+
+    return normalized_df
+
+
+def validate_labels_integrity(labels_df: pd.DataFrame) -> dict:
+    """Validate structural and semantic integrity for the label dataset.
+
+    Args:
+        labels_df: DataFrame containing normalized labels.
+
+    Returns:
+        A dictionary with integrity and distribution metrics.
+    """
+    validation_df = labels_df.copy()
+
+    null_id_count = int(validation_df["loan_id"].isna().sum())
+    duplicate_id_count = int(validation_df["loan_id"].duplicated().sum())
+    null_label_count = int(validation_df["loan_status"].isna().sum())
+    invalid_label_count = int((~validation_df["loan_status"].isin(["Approved", "Denied"]) & validation_df["loan_status"].notna()).sum())
+
+    class_distribution = validation_df["loan_status"].value_counts(dropna=True).to_dict()
+
+    return {
+        "row_count": int(len(validation_df)),
+        "null_id_count": null_id_count,
+        "duplicate_id_count": duplicate_id_count,
+        "null_label_count": null_label_count,
+        "invalid_label_count": invalid_label_count,
+        "class_distribution": class_distribution,
+    }
+
+
+def validate_label_coverage(features_df: pd.DataFrame, labels_df: pd.DataFrame, id_column: str = "loan_id") -> dict:
+    """Measure label coverage against a feature dataset by identifier.
+
+    Args:
+        features_df: Feature DataFrame that should be label-addressable.
+        labels_df: Label DataFrame containing at least `loan_id`.
+        id_column: Join key used to measure coverage.
+
+    Returns:
+        Coverage metrics for governance and quality controls.
+    """
+    features_copy = features_df.copy()
+    labels_copy = labels_df.copy()
+
+    features_ids = set(features_copy[id_column].dropna().astype("string").str.strip())
+    labels_ids = set(labels_copy[id_column].dropna().astype("string").str.strip())
+
+    feature_rows = len(features_copy)
+    matched_feature_rows = int(features_copy[id_column].astype("string").str.strip().isin(labels_ids).sum())
+    unmatched_feature_rows = feature_rows - matched_feature_rows
+    labels_without_feature = len(labels_ids - features_ids)
+
+    coverage_pct = 0.0
+    if feature_rows > 0:
+        coverage_pct = (matched_feature_rows / feature_rows) * 100
+
+    return {
+        "feature_rows": int(feature_rows),
+        "matched_feature_rows": int(matched_feature_rows),
+        "unmatched_feature_rows": int(unmatched_feature_rows),
+        "labels_without_feature": int(labels_without_feature),
+        "coverage_pct": float(round(coverage_pct, 2)),
+    }
+
+
+def save_labels_data(
+    labels_df: pd.DataFrame,
+    source: str,
+    owner: str,
+    quality_notes: str = "",
+    run_id: str | None = None,
+) -> None:
+    """Persist labels to latest and versioned snapshots with metadata.
+
+    Args:
+        labels_df: Validated labels DataFrame with `loan_id` and `loan_status`.
+        source: Human-readable source descriptor for governance records.
+        owner: Accountable owner of the label snapshot.
+        quality_notes: Optional quality summary for governance and audits.
+        run_id: Optional snapshot identifier in `YYYYMMDD_HHMMSS` format.
+
+    Returns:
+        None. Writes CSV and metadata JSON files to disk.
+    """
+    safe_labels_df = labels_df.copy()
+
+    if run_id is None:
+        run_id = datetime.now().strftime("%Y%m%d_%H%M%S")
+
+    LABELS_ROOT_PATH.mkdir(parents=True, exist_ok=True)
+    LABELS_VERSIONS_PATH.mkdir(parents=True, exist_ok=True)
+    LEGACY_LABELS_PATH.parent.mkdir(parents=True, exist_ok=True)
+
+    latest_file_path = LABELS_LATEST_PATH
+    versioned_file_path = LABELS_VERSIONS_PATH / f"loan_labels_{run_id}.csv"
+    metadata_file_path = LABELS_VERSIONS_PATH / f"loan_labels_{run_id}.meta.json"
+
+    safe_labels_df.to_csv(latest_file_path, index=False)
+    safe_labels_df.to_csv(versioned_file_path, index=False)
+
+    # Keep legacy path available while downstream modules migrate to data/labels.
+    safe_labels_df.to_csv(LEGACY_LABELS_PATH, index=False)
+
+    validation_report = validate_labels_integrity(safe_labels_df)
+    metadata = {
+        "run_id": run_id,
+        "created_at": datetime.now().isoformat(timespec="seconds"),
+        "source": source,
+        "owner": owner,
+        "quality_notes": quality_notes,
+        "integrity_report": validation_report,
+    }
+    metadata_file_path.write_text(json.dumps(metadata, indent=2), encoding="utf-8")
+
+    print(f"Updated latest labels file: {latest_file_path}")
+    print(f"Saved versioned labels file: {versioned_file_path}")
+    print(f"Saved labels metadata file: {metadata_file_path}")
+
+
+def ingest_human_labels(
+    labels_path: str,
+    id_column: str = "loan_id",
+    label_column: str = "loan_status",
+    source: str = "human_review",
+    owner: str = "unassigned",
+    quality_notes: str = "",
+    run_id: str | None = None,
+) -> pd.DataFrame:
+    """Ingest an external human-label file and persist governed label snapshots.
+
+    Args:
+        labels_path: CSV path containing human-generated labels.
+        id_column: Identifier column name in the external file.
+        label_column: Label column name in the external file.
+        source: Source descriptor for audit metadata.
+        owner: Responsible owner for the label snapshot.
+        quality_notes: Optional quality summary.
+        run_id: Optional explicit run identifier.
+
+    Returns:
+        The validated canonical labels DataFrame.
+
+    Raises:
+        FileNotFoundError: If the external labels file does not exist.
+        ValueError: If required columns or integrity validations fail.
+    """
+    input_path = Path(labels_path)
+    if not input_path.exists():
+        raise FileNotFoundError(f"Labels file not found: {labels_path}")
+
+    raw_labels_df = pd.read_csv(input_path)
+    working_df = raw_labels_df.copy()
+    working_df.columns = [column_name.lower() for column_name in working_df.columns]
+
+    normalized_id_column = id_column.lower()
+    normalized_label_column = label_column.lower()
+
+    if normalized_id_column not in working_df.columns:
+        raise ValueError(f"Missing id column in labels file: {id_column}")
+    if normalized_label_column not in working_df.columns:
+        raise ValueError(f"Missing label column in labels file: {label_column}")
+
+    canonical_labels_df = working_df[[normalized_id_column, normalized_label_column]].copy()
+    canonical_labels_df = canonical_labels_df.rename(columns={
+        normalized_id_column: "loan_id",
+        normalized_label_column: "loan_status",
+    })
+
+    canonical_labels_df = normalize_label_values(canonical_labels_df)
+    validation_report = validate_labels_integrity(canonical_labels_df)
+
+    if validation_report["null_id_count"] > 0:
+        raise ValueError("Label integrity error: loan_id contains null values.")
+    if validation_report["duplicate_id_count"] > 0:
+        raise ValueError("Label integrity error: duplicate loan_id values detected.")
+    if validation_report["null_label_count"] > 0:
+        raise ValueError("Label integrity error: loan_status contains null values.")
+    if validation_report["invalid_label_count"] > 0:
+        raise ValueError("Label integrity error: loan_status contains values outside the approved dictionary.")
+
+    save_labels_data(
+        canonical_labels_df,
+        source=source,
+        owner=owner,
+        quality_notes=quality_notes,
+        run_id=run_id,
+    )
+    return canonical_labels_df
+
+def add_basic_features(dataset: pd.DataFrame) -> pd.DataFrame:
+    """Placeholder hook for future feature engineering extensions.
+
+    Current behavior intentionally keeps the dataset unchanged because
+    `total_income` and `loan_to_income_ratio` are derived in `LoanApplication`
+    and `loan_status` is managed as an external benchmark label.
+
+    Args:
+        dataset: Clean DataFrame used as the base for optional feature generation.
+
+    Returns:
+        An unchanged copy of the input DataFrame.
+    """
+    featured_df = dataset.copy()
+    print("\nNo additional EDA features were applied in this run.")
     return featured_df
 
-def save_processed_data(dataset: pd.DataFrame, output_csv_path: str, run_id: str | None = None) -> None:
+def save_processed_data(dataset: pd.DataFrame, output_csv_path: str = "data/processed/loans_cleaned.csv", run_id: str | None = None) -> None:
     """Persist processed data as latest and optionally as a versioned snapshot.
 
     Args:
@@ -180,10 +469,38 @@ def save_processed_data(dataset: pd.DataFrame, output_csv_path: str, run_id: str
     except Exception as e:
         print(f"Write error: {e}")
 
+def run_pipeline(input_path: str) -> pd.DataFrame:
+    """Run the explicit data preparation pipeline from raw input to processed output.
+
+    Pipeline order:
+    - Load
+    - Clean
+    - Rename schema fields
+    - Apply feature hook
+    - Split benchmark labels
+    - Save processed features
+
+    Args:
+        input_path: Source CSV path used as pipeline input.
+
+    Returns:
+        The processed feature DataFrame generated by the pipeline.
+
+    Raises:
+        FileNotFoundError: If input data cannot be loaded.
+    """
+    df = load_raw_data(input_path)
+    if df is None:
+        raise FileNotFoundError(f"Pipeline input could not be loaded: {input_path}")
+
+    df = clean_data(df)
+    df = rename_columns(df)
+    df = add_basic_features(df)
+    df = split_labels(df)
+    save_processed_data(df)
+    return df
+
 if __name__ == "__main__":
-    """Run a local smoke test for raw-data loading and inspection."""
-    raw_csv_path = "data/raw/loans_data.csv"
-    raw_data = load_raw_data(raw_csv_path)
-    
-    if raw_data is not None:
-        inspect_data(raw_data)
+    """Run a local smoke test for the full pipeline."""
+    pipeline_df = run_pipeline("data/raw/loan_train.csv")
+    inspect_dataset(pipeline_df)

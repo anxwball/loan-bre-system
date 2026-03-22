@@ -1,8 +1,8 @@
 """Execute the EDA workflow for the loan dataset and generate chart artifacts.
 
-This script orchestrates dataset acquisition (processed-first fallback to raw),
-profiling, cleaning/feature-enrichment when needed, and batch export of plots to
-both versioned and latest graph directories.
+This script orchestrates EDA plotting over the output of the data pipeline.
+Data preparation itself lives in `src.data_loader.run_pipeline`, while this
+module focuses on chart generation and artifact export.
 """
 
 import matplotlib.pyplot as plt
@@ -11,12 +11,7 @@ import pandas as pd
 from datetime import datetime
 from pathlib import Path
 from src.data_loader import (
-    load_raw_data,
-    load_processed_data,
-    inspect_data,
-    clean_data,
-    add_basic_features,
-    save_processed_data
+    run_pipeline,
 )
 
 sns.set_theme(style="whitegrid", palette="muted")
@@ -27,18 +22,18 @@ RUN_ID = datetime.now().strftime("%Y%m%d_%H%M%S")
 GRAPH_ROOT = Path("graphs")
 GRAPH_RUN_DIR = GRAPH_ROOT / RUN_ID
 GRAPH_LATEST_DIR = GRAPH_ROOT / "latest"
+LABELS_LATEST_PATH = Path("data/labels/loan_labels_latest.csv")
 
 # Main pipeline
 
-PROCESSED_DATA_PATH = "data/processed/loans_cleaned.csv"
-RAW_DATA_PATH = "data/raw/loans_data.csv"
+PIPELINE_INPUT_PATH = "data/raw/loan_train.csv"
 
 def run_eda():
     """Run the end-to-end EDA pipeline and produce all visual outputs.
 
     Flow:
-    - Attempt to load the latest processed dataset.
-    - If unavailable, load raw data, inspect, clean, engineer features, and persist.
+    - Execute `run_pipeline()` once to generate/refresh processed features.
+    - Plot available EDA visuals from the returned dataset.
     - Generate and save all configured charts.
 
     Returns:
@@ -46,34 +41,74 @@ def run_eda():
     """
     print("\nStarting EDA run...")
 
-    dataset = load_processed_data(PROCESSED_DATA_PATH)
-
-    if dataset is not None:
-        print("Using latest processed data. Raw step skipped.")
-        inspect_data(dataset)
-    else:
-        print("No processed data found. Running from raw source.")
-        raw_dataset = load_raw_data(RAW_DATA_PATH)
-        if raw_dataset is None:
-            print("Raw data load failed.")
-            return
-        inspect_data(raw_dataset)
-        print("\nRunning cleaning step...")
-        cleaned_dataset = clean_data(raw_dataset)
-        inspect_data(cleaned_dataset)
-        dataset = add_basic_features(cleaned_dataset)
-        inspect_data(dataset)
-        save_processed_data(
-            dataset,
-            PROCESSED_DATA_PATH,
-            run_id=RUN_ID
-        )
+    feature_dataset = run_pipeline(PIPELINE_INPUT_PATH)
+    dataset = prepare_dataset_for_plots(feature_dataset)
 
     print("\nGenerating charts...")
     print(f"Run artifacts path: {GRAPH_RUN_DIR}")
-    plot_all_charts(dataset)
+    plot_all(dataset)
 
-def plot_all_charts(dataset: pd.DataFrame) -> None:
+
+def prepare_dataset_for_plots(feature_dataset: pd.DataFrame) -> pd.DataFrame:
+    """Assemble a plotting dataset from features plus optional labels.
+
+    The function preserves the feature-only output contract of the pipeline,
+    and enriches an in-memory copy for EDA-only supervised charts.
+
+    Args:
+        feature_dataset: Feature DataFrame returned by `run_pipeline`.
+
+    Returns:
+        A DataFrame ready for plotting, with labels and ratio if available.
+    """
+    plot_df = feature_dataset.copy()
+    plot_df = merge_labels_for_eda(plot_df)
+
+    if {"loan_amount", "applicant_income", "coapplicant_income"}.issubset(plot_df.columns):
+        total_income = plot_df["applicant_income"] + plot_df["coapplicant_income"]
+        plot_df["loan_to_income_ratio"] = (plot_df["loan_amount"] / total_income.where(total_income > 0)).fillna(0.0)
+
+    return plot_df
+
+
+def merge_labels_for_eda(feature_dataset: pd.DataFrame) -> pd.DataFrame:
+    """Attach latest governed labels to features for EDA charts.
+
+    Args:
+        feature_dataset: Feature DataFrame that includes `loan_id`.
+
+    Returns:
+        Feature DataFrame with `loan_status` when labels are available.
+    """
+    merged_df = feature_dataset.copy()
+
+    if "loan_id" not in merged_df.columns:
+        print("No 'loan_id' column found. Skipping label merge for EDA.")
+        return merged_df
+
+    if not LABELS_LATEST_PATH.exists():
+        print(f"Labels file not found at '{LABELS_LATEST_PATH}'. Target-based charts may be skipped.")
+        return merged_df
+
+    labels_df = pd.read_csv(LABELS_LATEST_PATH)
+    labels_df = labels_df.copy()
+    labels_df.columns = [column_name.lower() for column_name in labels_df.columns]
+
+    if "loan_id" not in labels_df.columns or "loan_status" not in labels_df.columns:
+        print("Labels file is missing required columns 'loan_id'/'loan_status'.")
+        return merged_df
+
+    labels_df["loan_id"] = labels_df["loan_id"].astype("string").str.strip()
+    labels_df["loan_status"] = labels_df["loan_status"].astype("string").str.strip()
+
+    merged_df["loan_id"] = merged_df["loan_id"].astype("string").str.strip()
+    merged_df = merged_df.merge(labels_df[["loan_id", "loan_status"]], on="loan_id", how="left")
+
+    matched_labels = int(merged_df["loan_status"].notna().sum())
+    print(f"Merged labels for EDA: {matched_labels}/{len(merged_df)} rows matched.")
+    return merged_df
+
+def plot_all(dataset: pd.DataFrame) -> None:
     """Generate the full set of EDA charts for a prepared dataset.
 
     Args:
@@ -121,6 +156,10 @@ def plot_target_distribution(dataset: pd.DataFrame) -> None:
     Returns:
         None. Renders and saves the chart.
     """
+    if 'loan_status' not in dataset.columns:
+        print("Missing 'loan_status'. Skipping target distribution chart.")
+        return
+
     fig, ax = plt.subplots()
     counts = dataset['loan_status'].value_counts()
     color_map = {"Approved": "#4CAF50", "Denied": "#F44336"}
@@ -149,6 +188,10 @@ def plot_categorical_vs_target(dataset: pd.DataFrame) -> None:
     Returns:
         None. Renders and saves a multi-panel chart, or exits if no features exist.
     """
+    if 'loan_status' not in dataset.columns:
+        print("Missing 'loan_status'. Skipping categorical vs target chart.")
+        return
+
     categorical_features = ['gender', 'married', 'education', 'self_employed', 'property_area', 'credit_history']
 
     # Filter unavailable features to keep the function robust across schema changes.
@@ -208,8 +251,12 @@ def plot_numerical_distributions(dataset: pd.DataFrame) -> None:
     Returns:
         None. Renders and saves the chart grid.
     """
-    numeric_features = ['applicantincome', 'loanamount', 'total_income', 'loan_to_income_ratio']
+    numeric_features = ['applicant_income', 'coapplicant_income', 'loan_amount', 'loan_amount_term']
     numeric_features = [feature_name for feature_name in numeric_features if feature_name in dataset.columns]
+
+    if not numeric_features:
+        print("No numerical features found for plotting.")
+        return
 
     fig, axes = plt.subplots(2, 2, figsize=(14, 10))
     axes = axes.flatten()
@@ -253,9 +300,9 @@ def plot_loan_to_income(dataset: pd.DataFrame) -> None:
         None. Renders and saves the chart, or exits if required columns are missing.
     """
 
-    if 'loan_to_income_ratio' not in dataset.columns:
+    if 'loan_status' not in dataset.columns or 'loan_to_income_ratio' not in dataset.columns:
         # Abort early when prerequisite feature is not available.
-        print("Missing 'loan_to_income_ratio'. Skipping chart.")
+        print("Missing 'loan_status' or 'loan_to_income_ratio'. Skipping chart.")
         return
     
     fig, ax = plt.subplots()
