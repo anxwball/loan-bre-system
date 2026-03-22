@@ -1,8 +1,8 @@
 # Loan BRE System
 
-Proyecto personal-didáctico de evaluación de solicitudes de préstamos construido alrededor de un **Business Rules Engine (BRE)**. El proyecto está en desarrollo activo y actualmente cubre la fase de exploración y preprocesamiento de datos (EDA).
+Proyecto personal de evaluacion de solicitudes de prestamos centrado en la implementacion de un **Business Rules Engine (BRE)**.
 
-La base de este trabajo utiliza el dataset de Kaggle **Loan Prediction Problem Dataset**, y el análisis actual está construido sobre esa referencia.
+La base de datos proviene de Kaggle (**Loan Prediction Problem Dataset**), pero el foco actual no es un analisis EDA exhaustivo, sino habilitar un flujo reproducible para construir, probar y comparar versiones del BRE.
 
 ---
 
@@ -10,7 +10,8 @@ La base de este trabajo utiliza el dataset de Kaggle **Loan Prediction Problem D
 
 | Fase | Estado |
 |---|---|
-| EDA y preprocesamiento | ✅ Completo |
+| EDA y preprocesamiento minimo | ✅ Operativo |
+| Baseline bootstrap de etiquetas | ✅ Operativo |
 | Modelado del dominio BRE | 🔄 En desarrollo |
 | Motor de reglas deterministas | 🔄 Pendiente |
 | Tests unitarios | 🔄 Pendiente |
@@ -23,15 +24,16 @@ La base de este trabajo utiliza el dataset de Kaggle **Loan Prediction Problem D
 loan-bre-system/
 ├── data/
 │   ├── raw/               # Dataset original sin modificar
-│   └── processed/         # Datos limpios con feature engineering aplicado
-│                          # Incluye un dataset base trackeado y versiones por ejecución generadas localmente
+│   ├── processed/         # Dataset de features limpio (sin loan_status)
+│   └── labels/            # Etiquetas historicas para benchmark (latest + versions)
 ├── graphs/
 │   ├── latest/            # Gráficos de la última ejecución (acceso rápido)
 │   └── YYYYMMDD_HHMMSS/   # Gráficos versionados por ejecución
 ├── notebooks/
 │   └── eda_analysis.py    # Pipeline de EDA y visualizaciones
 ├── src/
-│   └── data_loader.py     # Carga, limpieza, feature engineering y guardado
+│   ├── data_loader.py     # Carga, limpieza, split de labels y persistencia
+│   └── loan_application.py # Modelo de dominio para BRE (invariantes + campos derivados)
 ├── tests/                 # Tests unitarios (pendiente)
 ├── pyproject.toml
 └── requirements.txt
@@ -49,19 +51,20 @@ loan-bre-system/
 
 ### Alcance actual
 
-- Incluye: EDA, limpieza, generación de variables iniciales y visualización reproducible
-- No incluye aún: decisión final del BRE ni modelo de reglas determinista completo
+- Incluye: limpieza, estandarizacion de columnas, separacion de etiquetas historicas y visualizacion base reproducible.
+- Incluye: baseline bootstrap de `loan_status` para comparacion tecnica inicial del BRE.
+- No incluye aun: decision final del BRE ni validacion de negocio con etiquetado auditado externo.
 
 ### Pipeline de datos
 
 El pipeline ejecuta las siguientes etapas en orden:
 
-1. **Carga inteligente**: si ya existe data procesada versionada, la reutiliza directamente sin reprocesar desde el raw.
-2. **Inspección**: dimensiones del dataset, tipos de columnas y reporte de valores nulos.
-3. **Limpieza**: imputación por moda en variables categóricas, por mediana en numéricas.
-4. **Feature engineering**: genera `total_income` (ingreso del solicitante + co-solicitante) y `loan_to_income_ratio` (ratio préstamo/ingreso total).
-5. **Guardado con versionado**: guarda tanto una versión `latest` como una versión estampada con timestamp por ejecución (artefacto local de ejecución).
-6. **Visualización**: 5 gráficos exportados a `graphs/latest/` y a la carpeta de la ejecución activa.
+1. Carga de dataset fuente.
+2. Limpieza e imputacion.
+3. Estandarizacion de nombres de columnas.
+4. Paso de features base (sin derivar decision ni etiquetas).
+5. Separacion de etiquetas historicas hacia archivo dedicado.
+6. Guardado del dataset de features limpio y versionado local de artefactos.
 
 ### Visualizaciones generadas
 
@@ -75,7 +78,12 @@ El pipeline ejecuta las siguientes etapas en orden:
 
 ### Nota sobre `loan_status`
 
-En esta fase, `loan_status` se construye usando `credit_history` como variable proxy (`credit_history == 1 → Approved`). Es una decisión temporal y deliberada: el objetivo del EDA es explorar patrones y calidad del dato, no modelar la decisión final. El estatus determinista completo, basado en múltiples características y reglas de negocio explícitas, será modelado en la fase del BRE.
+`loan_status` se mantiene como etiqueta de benchmark historico y se persiste en un archivo separado de las features. Actualmente se permite un baseline bootstrap para acelerar la implementacion del BRE.
+
+Regla de alcance:
+- `loan_status` no se usa como input del BRE.
+- `loan_status` solo se usa para comparacion y metricas tecnicas.
+- El objetivo principal es funcionalidad y trazabilidad del motor de reglas.
 
 ---
 
@@ -95,7 +103,7 @@ pip install -r requirements.txt
 python notebooks/eda_analysis.py
 ```
 
-La primera ejecución procesa desde el raw y guarda los artefactos. Las ejecuciones siguientes cargan automáticamente la última versión procesada.
+Cada ejecucion corre el pipeline desde raw, persiste features limpios y luego genera graficos. El merge de etiquetas para graficos supervisados se hace en memoria desde `data/labels/loan_labels_latest.csv`.
 
 ---
 
@@ -110,12 +118,12 @@ La primera ejecución procesa desde el raw y guarda los artefactos. Las ejecucio
 
 ---
 
-## Próximos pasos
+## Proximos pasos
 
-- Definir un estatus de aprobación determinista con múltiples variables e invariantes del dominio
-- Diseñar las primeras reglas del BRE con criterios explícitos y trazables
-- Incorporar pruebas unitarias para validar el flujo de decisión
-- Refinar el pipeline para soportar nuevas iteraciones del motor de reglas
+- Cerrar Issue #1 con baseline bootstrap congelado y documentado.
+- Implementar Issue #2: primeras reglas trazables y flujo del motor BRE.
+- Incorporar pruebas unitarias para validar escenarios de aprobacion, denegacion y borde.
+- Agregar evaluacion por lotes BRE vs baseline bootstrap para comparar versiones de reglas.
 
 ---
 
