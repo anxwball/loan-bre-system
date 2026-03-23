@@ -15,8 +15,7 @@ Use this loading order:
 9. `docs/context/07_ai_assistant_rules.md`
 10. `docs/context/08_current_status_next_steps.md`
 11. `docs/context/09_glossary.md`
-12. `docs/context/11_approval_criteria.md`
-13. `docs/context/10_session_history.md`
+12. `docs/context/10_session_history.md`
 
 Language convention:
 - Internal context and instruction files are maintained in English.

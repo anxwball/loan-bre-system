@@ -1,13 +1,6 @@
 # 10. Session History
 
 ## 2026-03-22
-- Issue #1 domain invariants were finalized in `src/loan_application.py` by enforcing `loan_amount == 0` as invalid and `loan_amount_term <= 0` as invalid.
-- Approval criteria context file was normalized from a placeholder name to `docs/context/11_approval_criteria.md` and aligned internally with section number 11.
-- Context loading indexes were updated in `CLAUDE.md` and `docs/context/README.md` to include `11_approval_criteria.md` before session history.
-- Coherence alignment was added across context modules: `docs/context/04_bre_module.md` now marks prior rules as pre-finalization draft and references `11_approval_criteria.md` as the formal source for Issue #2.
-- `docs/context/08_current_status_next_steps.md` was updated to mark Issue #1 documentation closure and reprioritize remaining work from Issue #2 onward.
-
-## 2026-03-22
 - Documentation scope was updated to prioritize BRE functionality over exhaustive EDA analysis.
 - Bootstrap labels were formally accepted as the current benchmark baseline to continue Issue #1 pragmatically.
 - Root `README.md` and `docs/context/08_current_status_next_steps.md` were aligned with this decision.
