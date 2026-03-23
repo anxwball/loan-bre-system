@@ -53,6 +53,8 @@ class LoanApplication:
 
         Raises:
             ValueError: If any numeric invariant is violated.
+            ValueError: If loan_amount is zero.
+            ValueError: If loan_amount_term is zero or negative.
         """
         if self.applicant_income < 0:
             raise ValueError("Applicant income cannot be negative.")
@@ -62,6 +64,10 @@ class LoanApplication:
             raise ValueError("Loan amount cannot be negative.")
         if self.credit_history not in (0, 1):
             raise ValueError("Credit history must be either 0 or 1.")
+        if self.loan_amount == 0:
+            raise ValueError("Loan amount must be greater than zero.")
+        if self.loan_amount_term <= 0:
+            raise ValueError("Loan term must be a positive number of months.")
 
         self.total_income = self.applicant_income + self.coapplicant_income
         if self.total_income <= 0:

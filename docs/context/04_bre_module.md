@@ -1,5 +1,9 @@
 # 04. BRE Module (Business Rules Engine)
 
+Scope note:
+- Formal deterministic approval criteria are defined in `docs/context/11_approval_criteria.md`.
+- This module page keeps the pre-finalization BRE design snapshot and must be reconciled during Issue #2 implementation.
+
 Design pattern:
 - Simplified Strategy Pattern.
 - Each rule is a pure function that receives `LoanApplication` and returns `RuleResult`.
@@ -26,7 +30,7 @@ Execution flow:
    - Soft rules next. They accumulate positive or negative points.
    - Final approval if `score >= APPROVAL_THRESHOLD (40)`.
 
-Implemented rules:
+Draft rules (pre-Issue #1 finalization):
 
 | ID  | Name | Type | Purpose |
 |-----|--------|------|-----------|
