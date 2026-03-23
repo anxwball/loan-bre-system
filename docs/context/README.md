@@ -9,7 +9,7 @@ Goals:
 
 Structure:
 - `00_meta.md`: scope, ownership, and update rules.
-- `01_developer_profile.md` to `11_approval_criteria.md`: modular context sections.
+- `01_developer_profile.md` to `09_glossary.md`: modular context sections.
 - `10_session_history.md`: working log and session continuity.
 - `agents/`: AI-specific adapters.
 
@@ -24,8 +24,7 @@ Recommended load order:
 8. `07_ai_assistant_rules.md`
 9. `08_current_status_next_steps.md`
 10. `09_glossary.md`
-11. `11_approval_criteria.md`
-12. `10_session_history.md`
+11. `10_session_history.md`
 
 Language convention:
 - All internal context and instruction files are written in English for standardization and better token processing.
