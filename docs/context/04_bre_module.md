@@ -2,7 +2,7 @@
 
 Scope note:
 - Formal deterministic approval criteria are defined in `docs/context/11_approval_criteria.md`.
-- This module page keeps the pre-finalization BRE design snapshot and must be reconciled during Issue #2 implementation.
+- This module page summarizes the implementation contract for Issue #2.
 
 Design pattern:
 - Simplified Strategy Pattern.
@@ -26,25 +26,28 @@ def rule_name(app: LoanApplication) -> RuleResult:
 Execution flow:
 1. Add function to `HARD_RULES` or `SOFT_RULES` in `bre_rules.py`.
 2. `RuleEngine.evaluate(app)` runs:
-   - Hard rules first. If one fails, immediate rejection with `score=0`.
-   - Soft rules next. They accumulate positive or negative points.
-   - Final approval if `score >= APPROVAL_THRESHOLD (40)`.
+    - Hard rules first. If one fails, immediate rejection.
+    - Soft rules next. They accumulate risk points.
+    - Final decision by risk bands: 0-30 approve, 31-50 approve flagged, 51+ deny.
 
-Draft rules (pre-Issue #1 finalization):
+Implemented rule set (aligned with `11_approval_criteria.md`):
 
 | ID  | Name | Type | Purpose |
 |-----|--------|------|-----------|
 | R01 | CreditHistoryRequired | Hard | Reject if `credit_history == 0` |
-| R02 | MinimumIncome | Hard | Reject if `total_income < 2500` |
-| R03 | LoanAmountSanity | Hard | Reject if `loan_amount <= 0` |
-| R04 | LowDebtRatio | Soft | +30 pts if `loan_to_income_ratio <= 0.35` |
-| R05 | ModerateDebtRatio | Soft | +10 pts if ratio is between `0.35` and `0.50` |
-| R06 | HighDebtRatio | Soft | -20 pts if ratio `> 0.50` |
-| R07 | IsMarried | Soft | +15 pts if `married == "Yes"` |
-| R08 | IsGraduate | Soft | +10 pts if `education == "Graduate"` |
-| R09 | IsNotSelfEmployed | Soft | +10 pts if `self_employed == "No"` |
-| R10 | HasNoDependents | Soft | +10 pts if `dependents == "0"` |
-| R11 | LongLoanTerm | Soft | +5 pts if `loan_amount_term >= 360` |
+| R02 | PositiveTotalIncome | Hard | Reject if `total_income <= 0` |
+| R03 | MonthlyPaymentCapacity | Hard | Reject if `(loan_amount / loan_amount_term) / total_income > 0.40` |
+| R04 | HighLeverage | Soft | +20 risk if `loan_to_income_ratio > 6.0` |
+| R05 | ModerateLeverage | Soft | +10 risk if `loan_to_income_ratio > 3.0` |
+| R06 | SelfEmployedRisk | Soft | +15 risk if `self_employed == "Yes"` |
+| R07 | HighDependentsBurden | Soft | +10 risk if `dependents == "3+"` |
+| R08 | ModerateDependentsBurden | Soft | +5 risk if `dependents == "2"` |
+| R09 | RuralAreaRisk | Soft | +10 risk if `property_area == "Rural"` |
+| R10 | SemiurbanAreaRisk | Soft | +5 risk if `property_area == "Semiurban"` |
+| R11 | DualIncomeStability | Soft | -10 risk if `married == "Yes"` and `coapplicant_income > 0` |
 
-Approval threshold:
-- `APPROVAL_THRESHOLD = 40` defined in `bre_engine.py`.
+Decision policy:
+- Hard fail -> denied immediately.
+- Soft score 0-30 -> approved.
+- Soft score 31-50 -> approved with manual-review flag.
+- Soft score 51+ -> denied.

@@ -1,5 +1,13 @@
 # 10. Session History
 
+## 2026-03-23
+- Issue #2 first implementation was completed with a new isolated BRE module pair: `src/bre_rules.py` and `src/bre_engine.py`.
+- Rules are now traceable through `RuleResult` metadata (`rule_id`, `criterion_ref`, `rule_type`, `reason`) aligned to `docs/context/11_approval_criteria.md`.
+- `RuleEngine.evaluate()` now returns `DecisionResult` with decision, risk score, hard-rejection signal, review flag, reasons, and evaluated rule trace.
+- Documentation inconsistencies were resolved before implementation by updating `docs/context/04_bre_module.md` and `docs/context/09_glossary.md` to the hard+soft risk-band model.
+- Baseline unit tests were added in `tests/test_bre_engine.py` for hard denial, automatic approval, review-band approval, and high-risk denial scenarios.
+- Validation run completed: `pytest tests -v` passed with 4/4 tests.
+
 ## 2026-03-22
 - Issue #1 domain invariants were finalized in `src/loan_application.py` by enforcing `loan_amount == 0` as invalid and `loan_amount_term <= 0` as invalid.
 - Approval criteria context file was normalized from a placeholder name to `docs/context/11_approval_criteria.md` and aligned internally with section number 11.
