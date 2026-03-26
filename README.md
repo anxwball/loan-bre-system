@@ -12,9 +12,9 @@ La base de datos proviene de Kaggle (**Loan Prediction Problem Dataset**), pero 
 |---|---|
 | EDA y preprocesamiento minimo | ✅ Operativo |
 | Baseline bootstrap de etiquetas | ✅ Operativo |
-| Modelado del dominio BRE | 🔄 En desarrollo |
-| Motor de reglas deterministas | 🔄 Pendiente |
-| Tests unitarios | 🔄 Pendiente |
+| Modelado del dominio BRE | ✅ Operativo |
+| Motor de reglas deterministas | ✅ Primera version implementada |
+| Tests unitarios | 🔄 Baseline implementado |
 
 ---
 
@@ -33,15 +33,18 @@ loan-bre-system/
 │   └── eda_analysis.py    # Pipeline de EDA y visualizaciones
 ├── src/
 │   ├── data_loader.py     # Carga, limpieza, split de labels y persistencia
-│   └── loan_application.py # Modelo de dominio para BRE (invariantes + campos derivados)
-├── tests/                 # Tests unitarios (pendiente)
+│   ├── loan_application.py # Modelo de dominio para BRE (invariantes + campos derivados)
+│   ├── bre_rules.py       # Reglas hard/soft trazables (R01-R11)
+│   └── bre_engine.py      # Evaluacion de solicitud -> DecisionResult
+├── tests/
+│   └── test_bre_engine.py # Tests base del motor BRE
 ├── pyproject.toml
 └── requirements.txt
 ```
 
 ---
 
-## Fase actual: EDA
+## Fase actual: BRE v1 trazable + EDA base
 
 ### Fuente de datos
 
@@ -53,7 +56,8 @@ loan-bre-system/
 
 - Incluye: limpieza, estandarizacion de columnas, separacion de etiquetas historicas y visualizacion base reproducible.
 - Incluye: baseline bootstrap de `loan_status` para comparacion tecnica inicial del BRE.
-- No incluye aun: decision final del BRE ni validacion de negocio con etiquetado auditado externo.
+- Incluye: evaluacion de una solicitud con salida de decision, score y razones trazables por regla.
+- No incluye aun: benchmark por lotes BRE vs labels historicas ni modulo de auditoria persistente.
 
 ### Pipeline de datos
 

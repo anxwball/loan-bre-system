@@ -16,18 +16,18 @@ Working:
 
 Phase 2 status snapshot:
 - `LoanApplication` with domain invariants in `__post_init__` is implemented.
-- BRE with 3 hard rules and 8 soft rules is designed but not implemented.
-- `RuleEngine` with full flow and traceable `DecisionResult` is designed but not implemented.
-- Unit test suite with fixtures (`pytest tests/ -v`) is pending implementation.
+- BRE first version with 3 hard rules and 8 soft rules is implemented in `src/bre_rules.py`.
+- `RuleEngine` flow with traceable `DecisionResult` is implemented in `src/bre_engine.py`.
+- Baseline unit tests for approval/denial/review scenarios are implemented in `tests/test_bre_engine.py`.
+- Current test run status: `pytest tests -v` -> 4 passed.
 
 Pending (prioritized):
-1. Implement first traceable BRE rules and engine flow (Issue #2) aligned with `docs/context/11_approval_criteria.md`.
-2. Add unit tests for approval/denial/borderline scenarios (Issue #3).
-3. Batch evaluation on the cleaned dataset and comparison against bootstrap `loan_status` baseline.
-4. Audit module with persistence in `.jsonl` or SQLite.
-5. Phase 3 complementary ML with `scikit-learn`.
-6. Phase 4 REST API with FastAPI.
-7. Docker packaging for final README delivery.
+1. Expand unit tests with fixtures and edge-case coverage (Issue #3 continuation).
+2. Batch evaluation on the cleaned dataset and comparison against bootstrap `loan_status` baseline.
+3. Audit module with persistence in `.jsonl` or SQLite.
+4. Phase 3 complementary ML with `scikit-learn`.
+5. Phase 4 REST API with FastAPI.
+6. Docker packaging for final README delivery.
 
 Open decisions:
 - Decide whether batch runner belongs in `notebooks/` or `src/batch_evaluator.py`.
