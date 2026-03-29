@@ -1,5 +1,12 @@
 # 10. Session History
 
+## 2026-03-29
+- Issue #3 closure workflow was finalized on branch `feat/issue-3-test-suite`: commit was created, branch was pushed, and PR #7 was opened against `main` with `Closes #3` metadata.
+- A minor quality code fix was added to `notebooks/eda_analysis.py` by centralizing the "Loan Status" axis label into `SET_X_LABEL` and replacing unused subplot variables with underscore placeholders.
+- SonarQube Cloud warning about Python version scope was addressed by adding `sonar-project.properties` with `sonar.python.version=3.13`.
+- Sonar warning on float equality in tests was resolved in `tests/test_loan_application.py` by replacing direct float equality assertions with `pytest.approx(...)`.
+- Targeted validation was executed after the float fix: `pytest tests/test_loan_application.py -q` passed (9/9).
+
 ## 2026-03-25
 - Issue #3 test implementation was completed by splitting the suite into dedicated files: `tests/conftest.py`, `tests/test_rule_engine_decisions.py`, `tests/test_bre_rules.py`, `tests/test_loan_application.py`, and `tests/test_integral_dataset_flow.py`.
 - A deterministic integral smoke test was added using `data/processed/loans_cleaned.csv` and fixed row `loan_id=LP001015` to validate the full decision path (domain mapping -> engine evaluation -> trace assertions).

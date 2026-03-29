@@ -16,7 +16,11 @@ loan-bre-system/
 |  |- bre_rules.py          # Individual rules + HARD_RULES / SOFT_RULES
 |  |- bre_engine.py         # Orchestrator: LoanApplication -> DecisionResult
 |- tests/
-|  |- test_bre_engine.py    # Unit tests for rules, engine, and invariants
+|  |- conftest.py           # Shared fixtures for LoanApplication and RuleEngine
+|  |- test_rule_engine_decisions.py
+|  |- test_bre_rules.py
+|  |- test_loan_application.py
+|  |- test_integral_dataset_flow.py
 |- pyproject.toml
 |- requirements.txt
 |- .gitignore
@@ -29,9 +33,13 @@ Module relationships:
 eda_analysis.py      -> data_loader.py
 bre_engine.py        -> bre_rules.py -> loan_application.py
 bre_engine.py        -> loan_application.py
-test_bre_engine.py   -> bre_engine.py, bre_rules.py, loan_application.py
+test_rule_engine_decisions.py -> bre_engine.py, loan_application.py
+test_bre_rules.py             -> bre_rules.py, loan_application.py
+test_loan_application.py      -> loan_application.py
+test_integral_dataset_flow.py -> bre_engine.py, loan_application.py, data/processed/loans_cleaned.csv
 ```
 
 Import rule:
 - Always import from the project root (`from src.module import ...`).
-- Do not use `sys.path.append` (project uses editable install with `pip install -e .`).
+- Runtime code must not use `sys.path` mutation.
+- Test bootstrapping may use `tests/conftest.py` path injection when editable install is not guaranteed in local CI/dev shells.
