@@ -62,5 +62,5 @@ def test_derived_fields_are_computed_on_init() -> None:
 
     app = LoanApplication(**_base_payload())
 
-    assert app.total_income == 5000.0
-    assert app.loan_to_income_ratio == 0.02
+    assert app.total_income == pytest.approx(5000.0)
+    assert app.loan_to_income_ratio == pytest.approx(0.02)
