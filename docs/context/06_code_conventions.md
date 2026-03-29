@@ -27,7 +27,7 @@ Structure:
 Extension patterns:
 - New rule: add function in `bre_rules.py` + include in `HARD_RULES` or `SOFT_RULES`.
 - New data feature: add a new function in `data_loader.py`.
-- New test: use `test_<module>.py` or a dedicated class in `test_bre_engine.py`.
+- New test: place tests in focused modules (`test_rule_engine_decisions.py`, `test_bre_rules.py`, `test_loan_application.py`, `test_integral_dataset_flow.py`) instead of a monolithic file.
 - Reuse pytest fixtures; avoid repeatedly building `LoanApplication` inline.
 
 Language standard:

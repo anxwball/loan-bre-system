@@ -101,6 +101,19 @@ venv\Scripts\activate        # Windows
 pip install -r requirements.txt
 ```
 
+## Ejecucion de pruebas
+
+```bash
+pytest -v
+```
+
+Estructura de pruebas actual:
+
+- `tests/test_rule_engine_decisions.py`: flujo de decision (aprobacion, denegacion y casos borde).
+- `tests/test_bre_rules.py`: reglas atomicas hard y soft.
+- `tests/test_loan_application.py`: invariantes del dominio.
+- `tests/test_integral_dataset_flow.py`: test integral usando `data/processed/loans_cleaned.csv` como entrada.
+
 ## Ejecución del EDA
 
 ```bash

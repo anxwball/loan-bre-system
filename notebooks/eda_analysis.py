@@ -23,6 +23,7 @@ GRAPH_ROOT = Path("graphs")
 GRAPH_RUN_DIR = GRAPH_ROOT / RUN_ID
 GRAPH_LATEST_DIR = GRAPH_ROOT / "latest"
 LABELS_LATEST_PATH = Path("data/labels/loan_labels_latest.csv")
+SET_X_LABEL = "Loan Status"
 
 # Main pipeline
 
@@ -160,7 +161,7 @@ def plot_target_distribution(dataset: pd.DataFrame) -> None:
         print("Missing 'loan_status'. Skipping target distribution chart.")
         return
 
-    fig, ax = plt.subplots()
+    _, ax = plt.subplots()
     counts = dataset['loan_status'].value_counts()
     color_map = {"Approved": "#4CAF50", "Denied": "#F44336"}
     colors = [color_map.get(label, "#999999") for label in counts.index]
@@ -173,7 +174,7 @@ def plot_target_distribution(dataset: pd.DataFrame) -> None:
         ax.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 5, pct, ha='center', va='bottom', fontweight="bold")
 
     ax.set_title("Distribution of Loan Approvals", fontweight="bold")
-    ax.set_xlabel("Loan Status")
+    ax.set_xlabel(SET_X_LABEL)
     ax.set_ylabel("Number of Applicants")
     plt.tight_layout()
     save_plot("loan_approval_distribution.png")
@@ -237,7 +238,7 @@ def plot_categorical_vs_target(dataset: pd.DataFrame) -> None:
     fig.suptitle("Categorical Variables vs Loan Approval Status",
                  fontsize=14, fontweight="bold")
     if legend_handles and legend_labels:
-        fig.legend(legend_handles, legend_labels, title="Loan Status", loc="lower center", ncol=2, bbox_to_anchor=(0.5, 0.01))
+        fig.legend(legend_handles, legend_labels, title=SET_X_LABEL, loc="lower center", ncol=2, bbox_to_anchor=(0.5, 0.01))
     plt.tight_layout(rect=[0, 0.07, 1, 0.94])
     save_plot("categorical_vs_target.png")
     plt.show()
@@ -283,7 +284,7 @@ def plot_correlation_heatmap(dataset: pd.DataFrame) -> None:
     numeric_df = dataset.select_dtypes(include=["int64", "float64"])
     corr = numeric_df.corr()
 
-    fig, ax = plt.subplots(figsize=(10, 8))
+    _, ax = plt.subplots(figsize=(10, 8))
     sns.heatmap(corr, annot=True, fmt=".2f", cmap="coolwarm", linewidths=0.5, ax=ax, square=True)
     ax.set_title("Correlation Heatmap of Numerical Features", fontsize=14, fontweight="bold")
     plt.tight_layout()
@@ -305,10 +306,10 @@ def plot_loan_to_income(dataset: pd.DataFrame) -> None:
         print("Missing 'loan_status' or 'loan_to_income_ratio'. Skipping chart.")
         return
     
-    fig, ax = plt.subplots()
+    _, ax = plt.subplots()
     sns.boxplot(data=dataset, x="loan_status", y="loan_to_income_ratio", hue="loan_status", legend=False, ax=ax, palette={"Approved": "#4CAF50", "Denied": "#F44336"})
     ax.set_title("Loan-to-Income Ratio by Loan Status", fontsize=14, fontweight="bold")
-    ax.set_xlabel("Loan Status")
+    ax.set_xlabel(SET_X_LABEL)
     ax.set_ylabel("Loan-to-Income Ratio")
     plt.tight_layout()
     save_plot("loan_to_income_ratio_by_status.png", dpi=300)
