@@ -10,6 +10,7 @@ Goals:
 Structure:
 - `00_meta.md`: scope, ownership, and update rules.
 - `01_developer_profile.md` to `11_approval_criteria.md`: modular context sections.
+- `12_session_protocol.md`: mandatory pre-phase context-update protocol.
 - `10_session_history.md`: working log and session continuity.
 - `agents/`: AI-specific adapters.
 
@@ -25,7 +26,8 @@ Recommended load order:
 9. `08_current_status_next_steps.md`
 10. `09_glossary.md`
 11. `11_approval_criteria.md`
-12. `10_session_history.md`
+12. `12_session_protocol.md`
+13. `10_session_history.md`
 
 Language convention:
 - All internal context and instruction files are written in English for standardization and better token processing.
@@ -33,5 +35,6 @@ Language convention:
 
 Maintenance:
 - Update `10_session_history.md` at the end of every session.
+- Apply `12_session_protocol.md` before phase-oriented work when context may have changed.
 - Keep business decisions in their original modules.
 - Avoid duplicated content across modules.

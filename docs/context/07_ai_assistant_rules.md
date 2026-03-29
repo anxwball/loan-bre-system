@@ -27,3 +27,7 @@ Language and style policy:
 Target technical level:
 - Python basic to intermediate.
 - Explain new concepts (OOP, patterns, decorators) when they first appear.
+
+Session protocol policy:
+- For phase-oriented tasks, run the context update flow defined in `docs/context/12_session_protocol.md` before generating implementation output.
+- If context deltas are detected, propose only minimal patch items (`UPDATE`, `ADD`, `REMOVE`) and wait for explicit confirmation before editing context files.

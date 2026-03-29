@@ -7,7 +7,8 @@ Load instructions for Copilot:
 1. Read `docs/context/README.md`.
 2. Prioritize `01`, `03`, `06`, `07`, and `08` for implementation tasks.
 3. Load `04` and `05` when working on BRE or audit topics.
-4. Update `10_session_history.md` at session close.
+4. Apply `12_session_protocol.md` before phase-oriented work if context might have changed.
+5. Update `10_session_history.md` at session close.
 
 Language policy:
 - Internal context and instruction files are maintained in English.
