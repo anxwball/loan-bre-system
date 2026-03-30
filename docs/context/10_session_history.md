@@ -1,19 +1,18 @@
 # 10. Session History
 
 ## 2026-03-29
-- Implemented `src/batch_evaluator.py` for deterministic BRE batch evaluation against baseline labels in `data/processed/loan_labels.csv`.
-- Added focused unit coverage in `tests/test_batch_evaluator.py` and expanded decision-flow coverage with a non-negative score invariant in `tests/test_rule_engine_decisions.py`.
-- Updated `RuleEngine` in `src/bre_engine.py` to clamp final soft score to a floor of zero after compensatory rules.
-- Verified execution status after changes: `pytest -q` passed with 42/42 tests and batch run completed on the cleaned dataset.
-- Added `.gitignore` rule for generated batch outputs (`data/processed/batch_evaluation_*.csv`) to keep runtime artifacts out of version control.
-- Context documentation was synchronized to mark batch evaluation as implemented and reprioritize pending work toward the audit module.
+- Added file-processing performance logging to `src/data_loader.py` pipeline execution with DataFrame attrs (`file_processing_seconds`, `processed_rows_per_second`) and optional JSONL persistence.
+- Added `tests/test_data_loader.py` to validate pipeline performance attributes and JSONL audit record output.
+- Updated context and README documentation to reflect implemented audit baseline, batch performance logging, and current modular test coverage.
+- Validation executed after updates: `pytest -q` passed with 48/48 tests.
 
 ## 2026-03-29
+- Implemented batch-flow audit integration in `src/batch_evaluator.py` by wiring `src.audit_logger` persistence into `evaluate_batch_against_baseline(...)` through optional `batch_audit_path`.
+- `main()` now creates a versioned batch audit artifact automatically using `build_versioned_batch_audit_path()` and reports the generated path in execution output.
+- Expanded test coverage in `tests/test_batch_evaluator.py` with a JSONL audit persistence test that validates one audit line per compared row and key payload fields (`mode`, `applicant_id`, `predicted_status`, `baseline_status`, `matched`).
+- Validation executed after integration: `pytest -q` passed with 47/47 tests.
+## 2026-03-29
 - Session resumed under strict context protocol by reviewing `CLAUDE.md`, `docs/context/README.md`, `docs/context/06_code_conventions.md`, `docs/context/07_ai_assistant_rules.md`, `docs/context/08_current_status_next_steps.md`, and `docs/context/12_session_protocol.md` before implementation.
-- A context delta was confirmed: `docs/context/08_current_status_next_steps.md` still listed PR #7 merge as pending while Issue #3 is already integrated on `main`.
-- Minimal-diff patch was applied after explicit user confirmation: pending priorities were realigned to start with batch evaluation, and Phase 2 completion on `main` was made explicit.
-- Validation execution was scheduled immediately after context updates to close this session under protocol.
-
 ## 2026-03-29
 - Structural refactor completed to operationalize the new lifecycle context protocol for future sessions.
 - New context module `docs/context/12_session_protocol.md` was added as the canonical pre-phase workflow source.

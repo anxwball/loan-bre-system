@@ -14,7 +14,9 @@ La base de datos proviene de Kaggle (**Loan Prediction Problem Dataset**), pero 
 | Baseline bootstrap de etiquetas | ✅ Operativo |
 | Modelado del dominio BRE | ✅ Operativo |
 | Motor de reglas deterministas | ✅ Primera version implementada |
-| Tests unitarios | 🔄 Baseline implementado |
+| Evaluacion por lotes BRE vs baseline | ✅ Operativo |
+| Auditoria JSONL + rendimiento de archivos | ✅ Operativo |
+| Tests unitarios | ✅ Cobertura modular activa |
 
 ---
 
@@ -35,9 +37,17 @@ loan-bre-system/
 │   ├── data_loader.py     # Carga, limpieza, split de labels y persistencia
 │   ├── loan_application.py # Modelo de dominio para BRE (invariantes + campos derivados)
 │   ├── bre_rules.py       # Reglas hard/soft trazables (R01-R11)
-│   └── bre_engine.py      # Evaluacion de solicitud -> DecisionResult
+│   ├── bre_engine.py      # Evaluacion de solicitud -> DecisionResult
+│   ├── batch_evaluator.py # Evaluacion por lotes BRE vs baseline historico
+│   └── audit_logger.py    # Persistencia JSONL para decisiones y lotes
 ├── tests/
-│   └── test_bre_engine.py # Tests base del motor BRE
+│   ├── test_rule_engine_decisions.py
+│   ├── test_bre_rules.py
+│   ├── test_loan_application.py
+│   ├── test_integral_dataset_flow.py
+│   ├── test_batch_evaluator.py
+│   ├── test_audit_logger.py
+│   └── test_data_loader.py
 ├── pyproject.toml
 └── requirements.txt
 ```
@@ -57,7 +67,9 @@ loan-bre-system/
 - Incluye: limpieza, estandarizacion de columnas, separacion de etiquetas historicas y visualizacion base reproducible.
 - Incluye: baseline bootstrap de `loan_status` para comparacion tecnica inicial del BRE.
 - Incluye: evaluacion de una solicitud con salida de decision, score y razones trazables por regla.
-- No incluye aun: benchmark por lotes BRE vs labels historicas ni modulo de auditoria persistente.
+- Incluye: benchmark por lotes BRE vs labels historicas con CSV de comparacion y resumen agregado.
+- Incluye: auditoria persistente JSONL para decisiones y ejecuciones por lotes.
+- Incluye: logging de rendimiento de procesamiento de archivos (batch y pipeline).
 
 ### Pipeline de datos
 
@@ -113,6 +125,9 @@ Estructura de pruebas actual:
 - `tests/test_bre_rules.py`: reglas atomicas hard y soft.
 - `tests/test_loan_application.py`: invariantes del dominio.
 - `tests/test_integral_dataset_flow.py`: test integral usando `data/processed/loans_cleaned.csv` como entrada.
+- `tests/test_batch_evaluator.py`: metricas de lote, salida CSV, auditoria JSONL y rendimiento.
+- `tests/test_audit_logger.py`: persistencia JSONL y utilidades de path versionado.
+- `tests/test_data_loader.py`: logging de rendimiento de archivos en `run_pipeline`.
 
 ## Ejecución del EDA
 
@@ -137,10 +152,10 @@ Cada ejecucion corre el pipeline desde raw, persiste features limpios y luego ge
 
 ## Proximos pasos
 
-- Cerrar Issue #1 con baseline bootstrap congelado y documentado.
-- Implementar Issue #2: primeras reglas trazables y flujo del motor BRE.
-- Incorporar pruebas unitarias para validar escenarios de aprobacion, denegacion y borde.
-- Agregar evaluacion por lotes BRE vs baseline bootstrap para comparar versiones de reglas.
+- Definir si JSONL se mantiene como destino final de auditoria o migra a SQLite.
+- Implementar capa API (FastAPI) para exponer evaluacion individual y batch.
+- Diseñar la fase ML complementaria sin romper la trazabilidad del BRE.
+- Empaquetar despliegue con Docker y documentacion operativa final.
 
 ---
 

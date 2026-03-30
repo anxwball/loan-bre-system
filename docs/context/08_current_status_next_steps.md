@@ -20,17 +20,20 @@ Phase 2 status snapshot:
 - `RuleEngine` flow with traceable `DecisionResult` is implemented in `src/bre_engine.py`.
 - Issue #3 test suite is implemented with modular coverage in `tests/conftest.py`, `tests/test_rule_engine_decisions.py`, `tests/test_bre_rules.py`, `tests/test_loan_application.py`, and `tests/test_integral_dataset_flow.py`.
 - Batch evaluation module is implemented in `src/batch_evaluator.py` with baseline comparison against `data/processed/loan_labels.csv` and row-level output support.
+- Audit logging baseline is implemented in `src/audit_logger.py` with JSONL persistence for decision and batch flows.
+- Batch evaluator now emits a versioned batch audit artifact and includes file-processing performance metrics.
+- Data pipeline now exposes file-processing performance attributes and logs them to `data/audit/file_processing_latest.jsonl`.
 - Decision score is now clamped to a non-negative floor (`score >= 0`) after compensatory soft rules.
-- Current test run status: `pytest -q` -> 42 passed.
+- Current test run status: `pytest -q` -> 48 passed.
 - Sonar-focused quality fixes are applied: explicit `sonar.python.version=3.13` in `sonar-project.properties` and float-comparison hardening with `pytest.approx(...)` in tests.
-- Phase 2 implementation is complete on `main`; current execution focus is post-phase batch evaluation and audit planning.
+- Phase 2 implementation is complete on `main`; current execution focus is API exposure planning and production-grade audit destination decision.
 
 Pending (prioritized):
-1. Audit module with persistence in `.jsonl` or SQLite.
+1. Decide if JSONL remains final audit store or migrate to SQLite.
 2. Phase 3 complementary ML with `scikit-learn`.
 3. Phase 4 REST API with FastAPI.
 4. Docker packaging for final README delivery.
 
 Open decisions:
-- Decide the audit log destination.
+- Decide the long-term audit log destination strategy.
 - Decide whether ML replaces soft rules or is added as a new scored rule.

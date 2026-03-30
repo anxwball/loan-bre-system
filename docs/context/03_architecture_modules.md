@@ -10,17 +10,21 @@ loan-bre-system/
 |- notebooks/
 |  |- eda_analysis.py       # Executable EDA script (not Jupyter)
 |- src/
-|  |- __init__.py
 |  |- data_loader.py        # Load, inspect, clean, and engineer features
 |  |- loan_application.py   # BRE input dataclass + domain invariants
 |  |- bre_rules.py          # Individual rules + HARD_RULES / SOFT_RULES
 |  |- bre_engine.py         # Orchestrator: LoanApplication -> DecisionResult
+|  |- batch_evaluator.py    # Batch BRE-vs-baseline metrics and row-level outputs
+|  |- audit_logger.py       # JSONL audit persistence helpers for decision and batch flows
 |- tests/
 |  |- conftest.py           # Shared fixtures for LoanApplication and RuleEngine
 |  |- test_rule_engine_decisions.py
 |  |- test_bre_rules.py
 |  |- test_loan_application.py
 |  |- test_integral_dataset_flow.py
+|  |- test_batch_evaluator.py
+|  |- test_audit_logger.py
+|  |- test_data_loader.py
 |- pyproject.toml
 |- requirements.txt
 |- .gitignore
@@ -37,6 +41,9 @@ test_rule_engine_decisions.py -> bre_engine.py, loan_application.py
 test_bre_rules.py             -> bre_rules.py, loan_application.py
 test_loan_application.py      -> loan_application.py
 test_integral_dataset_flow.py -> bre_engine.py, loan_application.py, data/processed/loans_cleaned.csv
+test_batch_evaluator.py       -> batch_evaluator.py, bre_engine.py, loan_application.py
+test_audit_logger.py          -> audit_logger.py, bre_engine.py, loan_application.py
+test_data_loader.py           -> data_loader.py
 ```
 
 Import rule:
