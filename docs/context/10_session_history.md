@@ -1,6 +1,14 @@
 # 10. Session History
 
 ## 2026-03-29
+- Implemented `src/batch_evaluator.py` for deterministic BRE batch evaluation against baseline labels in `data/processed/loan_labels.csv`.
+- Added focused unit coverage in `tests/test_batch_evaluator.py` and expanded decision-flow coverage with a non-negative score invariant in `tests/test_rule_engine_decisions.py`.
+- Updated `RuleEngine` in `src/bre_engine.py` to clamp final soft score to a floor of zero after compensatory rules.
+- Verified execution status after changes: `pytest -q` passed with 42/42 tests and batch run completed on the cleaned dataset.
+- Added `.gitignore` rule for generated batch outputs (`data/processed/batch_evaluation_*.csv`) to keep runtime artifacts out of version control.
+- Context documentation was synchronized to mark batch evaluation as implemented and reprioritize pending work toward the audit module.
+
+## 2026-03-29
 - Session resumed under strict context protocol by reviewing `CLAUDE.md`, `docs/context/README.md`, `docs/context/06_code_conventions.md`, `docs/context/07_ai_assistant_rules.md`, `docs/context/08_current_status_next_steps.md`, and `docs/context/12_session_protocol.md` before implementation.
 - A context delta was confirmed: `docs/context/08_current_status_next_steps.md` still listed PR #7 merge as pending while Issue #3 is already integrated on `main`.
 - Minimal-diff patch was applied after explicit user confirmation: pending priorities were realigned to start with batch evaluation, and Phase 2 completion on `main` was made explicit.

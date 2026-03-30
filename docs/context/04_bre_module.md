@@ -28,6 +28,7 @@ Execution flow:
 2. `RuleEngine.evaluate(app)` runs:
     - Hard rules first. If one fails, immediate rejection.
     - Soft rules next. They accumulate risk points.
+    - Final score is clamped to a non-negative floor (`score >= 0`).
     - Final decision by risk bands: 0-30 approve, 31-50 approve flagged, 51+ deny.
 
 Implemented rule set (aligned with `11_approval_criteria.md`):
@@ -48,6 +49,7 @@ Implemented rule set (aligned with `11_approval_criteria.md`):
 
 Decision policy:
 - Hard fail -> denied immediately.
+- Soft score floor is zero after accumulation (no negative final scores).
 - Soft score 0-30 -> approved.
 - Soft score 31-50 -> approved with manual-review flag.
 - Soft score 51+ -> denied.

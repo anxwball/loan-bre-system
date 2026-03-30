@@ -19,18 +19,18 @@ Phase 2 status snapshot:
 - BRE first version with 3 hard rules and 8 soft rules is implemented in `src/bre_rules.py`.
 - `RuleEngine` flow with traceable `DecisionResult` is implemented in `src/bre_engine.py`.
 - Issue #3 test suite is implemented with modular coverage in `tests/conftest.py`, `tests/test_rule_engine_decisions.py`, `tests/test_bre_rules.py`, `tests/test_loan_application.py`, and `tests/test_integral_dataset_flow.py`.
-- Current test run status: `pytest -q` -> 40 passed.
+- Batch evaluation module is implemented in `src/batch_evaluator.py` with baseline comparison against `data/processed/loan_labels.csv` and row-level output support.
+- Decision score is now clamped to a non-negative floor (`score >= 0`) after compensatory soft rules.
+- Current test run status: `pytest -q` -> 42 passed.
 - Sonar-focused quality fixes are applied: explicit `sonar.python.version=3.13` in `sonar-project.properties` and float-comparison hardening with `pytest.approx(...)` in tests.
 - Phase 2 implementation is complete on `main`; current execution focus is post-phase batch evaluation and audit planning.
 
 Pending (prioritized):
-1. Batch evaluation on the cleaned dataset and comparison against bootstrap `loan_status` baseline.
-2. Audit module with persistence in `.jsonl` or SQLite.
-3. Phase 3 complementary ML with `scikit-learn`.
-4. Phase 4 REST API with FastAPI.
-5. Docker packaging for final README delivery.
+1. Audit module with persistence in `.jsonl` or SQLite.
+2. Phase 3 complementary ML with `scikit-learn`.
+3. Phase 4 REST API with FastAPI.
+4. Docker packaging for final README delivery.
 
 Open decisions:
-- Decide whether batch runner belongs in `notebooks/` or `src/batch_evaluator.py`.
 - Decide the audit log destination.
 - Decide whether ML replaces soft rules or is added as a new scored rule.
