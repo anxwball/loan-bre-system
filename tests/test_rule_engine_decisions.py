@@ -165,3 +165,15 @@ def test_rules_trace_contains_all_rules_on_non_hard_rejection(engine, build_appl
     assert len(result.rules_triggered) == 11
     assert result.rules_triggered[0].criterion_ref == "HARD-01"
     assert result.rules_triggered[-1].criterion_ref == "SOFT-08"
+
+
+def test_final_score_is_clamped_to_zero_when_compensatory_rule_goes_negative(engine, build_application) -> None:
+    """Final score should not go below zero after soft-rule compensation."""
+
+    app = build_application(married="Yes", coapplicant_income=1000.0)
+
+    result = engine.evaluate(app)
+
+    assert result.approved is True
+    assert result.flagged_for_review is False
+    assert result.score == 0

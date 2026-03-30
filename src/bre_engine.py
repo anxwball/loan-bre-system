@@ -92,6 +92,9 @@ class RuleEngine:
                 score += soft_result.points
                 reason_details.append(soft_result.reason)
 
+        if score < 0:
+            score = 0
+
         if score <= 30:
             approved = True
             flagged_for_review = False
