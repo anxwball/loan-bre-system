@@ -21,14 +21,14 @@ Phase 2 status snapshot:
 - Issue #3 test suite is implemented with modular coverage in `tests/conftest.py`, `tests/test_rule_engine_decisions.py`, `tests/test_bre_rules.py`, `tests/test_loan_application.py`, and `tests/test_integral_dataset_flow.py`.
 - Current test run status: `pytest -q` -> 40 passed.
 - Sonar-focused quality fixes are applied: explicit `sonar.python.version=3.13` in `sonar-project.properties` and float-comparison hardening with `pytest.approx(...)` in tests.
+- Phase 2 implementation is complete on `main`; current execution focus is post-phase batch evaluation and audit planning.
 
 Pending (prioritized):
-1. Merge PR #7 to close Issue #3 in `main` and re-run Sonar analysis on target branch.
-2. Batch evaluation on the cleaned dataset and comparison against bootstrap `loan_status` baseline.
-3. Audit module with persistence in `.jsonl` or SQLite.
-4. Phase 3 complementary ML with `scikit-learn`.
-5. Phase 4 REST API with FastAPI.
-6. Docker packaging for final README delivery.
+1. Batch evaluation on the cleaned dataset and comparison against bootstrap `loan_status` baseline.
+2. Audit module with persistence in `.jsonl` or SQLite.
+3. Phase 3 complementary ML with `scikit-learn`.
+4. Phase 4 REST API with FastAPI.
+5. Docker packaging for final README delivery.
 
 Open decisions:
 - Decide whether batch runner belongs in `notebooks/` or `src/batch_evaluator.py`.

@@ -1,6 +1,12 @@
 # 10. Session History
 
 ## 2026-03-29
+- Session resumed under strict context protocol by reviewing `CLAUDE.md`, `docs/context/README.md`, `docs/context/06_code_conventions.md`, `docs/context/07_ai_assistant_rules.md`, `docs/context/08_current_status_next_steps.md`, and `docs/context/12_session_protocol.md` before implementation.
+- A context delta was confirmed: `docs/context/08_current_status_next_steps.md` still listed PR #7 merge as pending while Issue #3 is already integrated on `main`.
+- Minimal-diff patch was applied after explicit user confirmation: pending priorities were realigned to start with batch evaluation, and Phase 2 completion on `main` was made explicit.
+- Validation execution was scheduled immediately after context updates to close this session under protocol.
+
+## 2026-03-29
 - Structural refactor completed to operationalize the new lifecycle context protocol for future sessions.
 - New context module `docs/context/12_session_protocol.md` was added as the canonical pre-phase workflow source.
 - Context load orders were updated in `CLAUDE.md` and `docs/context/README.md` to include section 12 before session history.
