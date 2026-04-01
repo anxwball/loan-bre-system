@@ -26,14 +26,18 @@ Phase 2 status snapshot:
 - Decision score is now clamped to a non-negative floor (`score >= 0`) after compensatory soft rules.
 - Current test run status: `pytest -q` -> 48 passed.
 - Sonar-focused quality fixes are applied: explicit `sonar.python.version=3.13` in `sonar-project.properties` and float-comparison hardening with `pytest.approx(...)` in tests.
-- Phase 2 implementation is complete on `main`; current execution focus is API exposure planning and production-grade audit destination decision.
+- Phase 2 implementation is complete on `main`; current execution focus is Phase 4b persistence enablement as a prerequisite for API exposure.
 
 Pending (prioritized):
-1. Decide if JSONL remains final audit store or migrate to SQLite.
+1. Phase 4b persistence layer (active):
+	- Add SQLAlchemy Core schema in `src/db/schema.py`.
+	- Add DB connection module in `src/db/database.py`.
+	- Add repositories under `src/db/repositories/`.
+	- Migrate audit writes from JSONL to SQL persistence with progressive deprecation of `src/audit_logger.py`.
 2. Phase 3 complementary ML with `scikit-learn`.
 3. Phase 4 REST API with FastAPI.
 4. Docker packaging for final README delivery.
 
 Open decisions:
-- Decide the long-term audit log destination strategy.
+- Define migration sequencing between JSONL and SQL persistence during Phase 4b.
 - Decide whether ML replaces soft rules or is added as a new scored rule.
