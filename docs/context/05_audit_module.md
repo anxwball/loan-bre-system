@@ -9,6 +9,7 @@ Implemented components:
 - Batch evaluation now supports decision-level JSONL rows plus a batch performance record.
 - Data pipeline execution now logs file-processing performance metrics to JSONL.
 - `src/db/schema.py` now defines SQLAlchemy Core tables for loan applications and audit artifacts.
+- `src/db/database.py` now provides engine creation, URL resolution, and schema initialization helpers.
 
 Decisions already made:
 - Traceability is provided by `DecisionResult.rules_triggered` and summary fields.
