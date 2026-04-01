@@ -11,6 +11,10 @@
 - Implemented Phase 4b-2 in `src/db/database.py` with database URL resolution, engine factory, schema bootstrap (`initialize_database`), transactional connection context, and engine disposal helpers.
 - Updated `src/db/__init__.py` exports and synchronized phase docs to mark `database.py` as implemented while keeping repositories and writer migration as pending.
 - Validation executed for database bootstrap: engine creation + `initialize_database(...)` succeeded and listed all 4 schema tables.
+- Implemented Phase 4b-3 repositories in `src/db/repositories/loan_repo.py` and `src/db/repositories/audit_repo.py` for SQL persistence of loan rows, evaluations, rule traces, and data-load metrics.
+- Added repository package exports in `src/db/repositories/__init__.py` and surfaced repository classes through `src/db/__init__.py`.
+- Added unit coverage in `tests/test_db_repositories.py`; validation run completed: `pytest tests/test_db_repositories.py -q` passed with 3/3 tests.
+- Documentation was synchronized across `08_current_status_next_steps.md`, `03_architecture_modules.md`, `05_audit_module.md`, and root `README.md` to reflect repository-layer completion.
 
 ## 2026-03-29
 - Added file-processing performance logging to `src/data_loader.py` pipeline execution with DataFrame attrs (`file_processing_seconds`, `processed_rows_per_second`) and optional JSONL persistence.

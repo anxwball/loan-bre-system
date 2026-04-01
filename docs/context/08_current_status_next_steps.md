@@ -32,7 +32,7 @@ Pending (prioritized):
 1. Phase 4b persistence layer (active):
 	- SQLAlchemy Core schema in `src/db/schema.py` is implemented in the current session.
 	- DB connection module in `src/db/database.py` is implemented in the current session.
-	- Add repositories under `src/db/repositories/`.
+	- Repositories under `src/db/repositories/` are implemented in the current session.
 	- Migrate audit writes from JSONL to SQL persistence with progressive deprecation of `src/audit_logger.py`.
 2. Phase 3 complementary ML with `scikit-learn`.
 3. Phase 4 REST API with FastAPI.

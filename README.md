@@ -44,7 +44,8 @@ loan-bre-system/
 │   └── db/
 │       ├── __init__.py    # Exportes publicos de la capa de persistencia
 │       ├── schema.py      # Esquema SQLAlchemy Core (Phase 4b)
-│       └── database.py    # Engine y bootstrap de persistencia (Phase 4b)
+│       ├── database.py    # Engine y bootstrap de persistencia (Phase 4b)
+│       └── repositories/  # Repositorios SQL para solicitudes y auditoria
 ├── tests/
 │   ├── test_rule_engine_decisions.py
 │   ├── test_bre_rules.py
@@ -52,7 +53,8 @@ loan-bre-system/
 │   ├── test_integral_dataset_flow.py
 │   ├── test_batch_evaluator.py
 │   ├── test_audit_logger.py
-│   └── test_data_loader.py
+│   ├── test_data_loader.py
+│   └── test_db_repositories.py
 ├── pyproject.toml
 └── requirements.txt
 ```
@@ -159,7 +161,7 @@ Cada ejecucion corre el pipeline desde raw, persiste features limpios y luego ge
 
 ## Proximos pasos
 
-- Implementar repositorios en `src/db/repositories/` y migrar escrituras de auditoria de JSONL a SQL de forma progresiva.
+- Migrar escrituras de auditoria de JSONL a SQL de forma progresiva usando `src/db/repositories/`.
 - Implementar capa API (FastAPI) para exponer evaluacion individual y batch.
 - Diseñar la fase ML complementaria sin romper la trazabilidad del BRE.
 - Empaquetar despliegue con Docker y documentacion operativa final.

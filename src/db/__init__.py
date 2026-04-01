@@ -10,6 +10,7 @@ from src.db.database import (
     initialize_database,
     resolve_database_url,
 )
+from src.db.repositories import AuditRepository, LoanRepository
 from src.db.schema import (
     audit_data_loads,
     audit_evaluations,
@@ -27,6 +28,8 @@ __all__ = [
     "initialize_database",
     "begin_connection",
     "dispose_engine",
+    "LoanRepository",
+    "AuditRepository",
     "metadata",
     "loan_applications",
     "audit_evaluations",

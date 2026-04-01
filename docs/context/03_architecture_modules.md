@@ -20,7 +20,7 @@ loan-bre-system/
 |  |  |- __init__.py        # Public exports for persistence-layer symbols
 |  |  |- schema.py          # SQLAlchemy Core schema for Phase 4b (implemented)
 |  |  |- database.py        # Engine and connection factory (implemented)
-|  |  |- repositories/      # Persistence repositories (planned)
+|  |  |- repositories/      # Persistence repositories (implemented)
 |- tests/
 |  |- conftest.py           # Shared fixtures for LoanApplication and RuleEngine
 |  |- test_rule_engine_decisions.py
@@ -50,6 +50,8 @@ test_batch_evaluator.py       -> batch_evaluator.py, bre_engine.py, loan_applica
 test_audit_logger.py          -> audit_logger.py, bre_engine.py, loan_application.py
 test_data_loader.py           -> data_loader.py
 src/db/__init__.py            -> src/db/schema.py
+src/db/repositories/loan_repo.py  -> src/db/schema.py, src/loan_application.py
+src/db/repositories/audit_repo.py -> src/db/schema.py, src/bre_engine.py, src/bre_rules.py
 ```
 
 Import rule:
@@ -60,4 +62,4 @@ Import rule:
 Phase 4b status:
 - `src/db/schema.py` is implemented.
 - `src/db/database.py` is implemented.
-- `src/db/repositories/` remains pending.
+- `src/db/repositories/` is implemented.

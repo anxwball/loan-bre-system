@@ -10,6 +10,7 @@ Implemented components:
 - Data pipeline execution now logs file-processing performance metrics to JSONL.
 - `src/db/schema.py` now defines SQLAlchemy Core tables for loan applications and audit artifacts.
 - `src/db/database.py` now provides engine creation, URL resolution, and schema initialization helpers.
+- `src/db/repositories/loan_repo.py` and `src/db/repositories/audit_repo.py` now provide SQL persistence operations for loan rows, evaluations, rule traces, and data-load metrics.
 
 Decisions already made:
 - Traceability is provided by `DecisionResult.rules_triggered` and summary fields.
@@ -23,4 +24,4 @@ rules_triggered (JSON), model_version
 ```
 
 Pending decision:
-- Final migration sequencing from JSONL writers to SQL repositories (`database.py` + `repositories/`).
+- Final migration sequencing from JSONL writers to SQL repositories in runtime flows (`batch_evaluator.py` and `data_loader.py`).
