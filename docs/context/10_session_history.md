@@ -15,6 +15,9 @@
 - Added repository package exports in `src/db/repositories/__init__.py` and surfaced repository classes through `src/db/__init__.py`.
 - Added unit coverage in `tests/test_db_repositories.py`; validation run completed: `pytest tests/test_db_repositories.py -q` passed with 3/3 tests.
 - Documentation was synchronized across `08_current_status_next_steps.md`, `03_architecture_modules.md`, `05_audit_module.md`, and root `README.md` to reflect repository-layer completion.
+- Started runtime migration phase for audit dual-write: `src/batch_evaluator.py` now supports optional SQL persistence for evaluations/traces/performance while retaining JSONL compatibility.
+- `src/data_loader.py` now supports optional SQL persistence for pipeline performance records via `sql_audit_database_url`.
+- Added migration-focused tests in `tests/test_batch_evaluator.py` and `tests/test_data_loader.py`; validation run completed: `pytest tests/test_batch_evaluator.py tests/test_data_loader.py -q` passed with 5/5 tests.
 
 ## 2026-03-29
 - Added file-processing performance logging to `src/data_loader.py` pipeline execution with DataFrame attrs (`file_processing_seconds`, `processed_rows_per_second`) and optional JSONL persistence.

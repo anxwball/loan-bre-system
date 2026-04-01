@@ -7,6 +7,8 @@ import json
 from pathlib import Path
 
 from src.batch_evaluator import evaluate_batch_against_baseline
+from src.db.database import build_sqlite_url, create_db_engine, dispose_engine, initialize_database
+from src.db.repositories import AuditRepository, LoanRepository
 
 
 def _write_csv(path: Path, rows: list[dict[str, object]], fieldnames: list[str]) -> None:
@@ -214,3 +216,85 @@ def test_batch_evaluation_writes_jsonl_audit_when_path_is_provided(tmp_path: Pat
     assert performance_record["compared_rows"] == 1
     assert performance_record["file_processing_seconds"] >= 0.0
     assert performance_record["compared_rows_per_second"] >= 0.0
+
+
+def test_batch_evaluation_dual_writes_audit_into_sql(tmp_path: Path) -> None:
+    """Batch evaluator should persist loan, evaluation, trace, and perf rows in SQL."""
+
+    features_path = tmp_path / "features.csv"
+    labels_path = tmp_path / "labels.csv"
+    db_path = tmp_path / "audit_batch.db"
+
+    feature_fieldnames = [
+        "loan_id",
+        "gender",
+        "married",
+        "dependents",
+        "education",
+        "self_employed",
+        "applicant_income",
+        "coapplicant_income",
+        "loan_amount",
+        "loan_amount_term",
+        "credit_history",
+        "property_area",
+    ]
+    label_fieldnames = ["loan_id", "loan_status"]
+
+    _write_csv(
+        features_path,
+        rows=[
+            {
+                "loan_id": "LSQL1",
+                "gender": "Male",
+                "married": "No",
+                "dependents": "0",
+                "education": "Graduate",
+                "self_employed": "No",
+                "applicant_income": 5000,
+                "coapplicant_income": 0,
+                "loan_amount": 100,
+                "loan_amount_term": 360,
+                "credit_history": 1,
+                "property_area": "Urban",
+            }
+        ],
+        fieldnames=feature_fieldnames,
+    )
+    _write_csv(
+        labels_path,
+        rows=[{"loan_id": "LSQL1", "loan_status": "Approved"}],
+        fieldnames=label_fieldnames,
+    )
+
+    summary = evaluate_batch_against_baseline(
+        features_path=features_path,
+        labels_path=labels_path,
+        output_path=None,
+        batch_audit_path=None,
+        sql_audit_database_url=build_sqlite_url(db_path),
+    )
+
+    assert summary.compared_rows == 1
+
+    verify_engine = create_db_engine(database_url=build_sqlite_url(db_path))
+    initialize_database(verify_engine)
+    try:
+        loan_repository = LoanRepository(verify_engine)
+        audit_repository = AuditRepository(verify_engine)
+
+        loan_row = loan_repository.get_by_loan_id("LSQL1")
+        assert loan_row is not None
+
+        evaluations = audit_repository.list_evaluations_for_application(int(loan_row["id"]))
+        assert len(evaluations) == 1
+        evaluation_id = int(evaluations[0]["id"])
+
+        traces = audit_repository.list_rule_traces(evaluation_id)
+        assert len(traces) > 0
+
+        data_loads = audit_repository.list_data_loads(limit=5)
+        assert len(data_loads) == 1
+        assert data_loads[0]["processed_rows"] == 1
+    finally:
+        dispose_engine(verify_engine)

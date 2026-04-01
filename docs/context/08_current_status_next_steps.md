@@ -33,7 +33,9 @@ Pending (prioritized):
 	- SQLAlchemy Core schema in `src/db/schema.py` is implemented in the current session.
 	- DB connection module in `src/db/database.py` is implemented in the current session.
 	- Repositories under `src/db/repositories/` are implemented in the current session.
-	- Migrate audit writes from JSONL to SQL persistence with progressive deprecation of `src/audit_logger.py`.
+	- `src/batch_evaluator.py` now supports optional SQL dual-write for evaluations, traces, and performance metrics.
+	- `src/data_loader.py` now supports optional SQL dual-write for pipeline performance metrics.
+	- Remaining step: migrate single-decision audit writes from `src/audit_logger.py` to SQL and complete progressive deprecation.
 2. Phase 3 complementary ML with `scikit-learn`.
 3. Phase 4 REST API with FastAPI.
 4. Docker packaging for final README delivery.

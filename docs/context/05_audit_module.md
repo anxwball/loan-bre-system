@@ -11,6 +11,8 @@ Implemented components:
 - `src/db/schema.py` now defines SQLAlchemy Core tables for loan applications and audit artifacts.
 - `src/db/database.py` now provides engine creation, URL resolution, and schema initialization helpers.
 - `src/db/repositories/loan_repo.py` and `src/db/repositories/audit_repo.py` now provide SQL persistence operations for loan rows, evaluations, rule traces, and data-load metrics.
+- `src/batch_evaluator.py` now supports optional SQL dual-write using repositories while preserving JSONL compatibility.
+- `src/data_loader.py` now supports optional SQL dual-write for pipeline performance records.
 
 Decisions already made:
 - Traceability is provided by `DecisionResult.rules_triggered` and summary fields.
@@ -24,4 +26,4 @@ rules_triggered (JSON), model_version
 ```
 
 Pending decision:
-- Final migration sequencing from JSONL writers to SQL repositories in runtime flows (`batch_evaluator.py` and `data_loader.py`).
+- Final migration sequencing for single-decision flow from `src/audit_logger.py` to SQL persistence and deprecation policy cutoff.
