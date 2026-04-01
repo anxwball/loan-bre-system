@@ -1,5 +1,31 @@
 # 10. Session History
 
+## 2026-04-01
+- Session executed under context protocol with a pre-Phase-4b blocker pass committed first (`fix(preflight): resolve Phase 4b blockers before schema implementation`).
+- Runtime compatibility fix was applied for Python 3.13 by bumping SQLAlchemy to `2.0.39` after import assertion failure (`fix(preflight): bump SQLAlchemy pin for Python 3.13 compatibility`).
+- Implemented Phase 4b schema module using SQLAlchemy Core in `src/db/schema.py` with shared `metadata`, 4 tables, controlled-field `CheckConstraint`s, and explicit `Index` definitions.
+- Added `src/db/__init__.py` explicit exports for schema symbols to stabilize imports.
+- Updated context docs to reflect active Phase 4b, `src/db/` module reference, and pending progressive deprecation of `src/audit_logger.py`.
+- Validation executed after implementation: `python -c "from src.db.schema import metadata, loan_applications, audit_evaluations, audit_rule_traces, audit_data_loads; print([t for t in metadata.tables])"` returned 4 table names successfully.
+- Final documentation pass completed for phase closure: updated architecture map (`03_architecture_modules.md`), audit transition status (`05_audit_module.md`), and root `README.md` to reflect Phase 4b persistence progress.
+- Implemented Phase 4b-2 in `src/db/database.py` with database URL resolution, engine factory, schema bootstrap (`initialize_database`), transactional connection context, and engine disposal helpers.
+- Updated `src/db/__init__.py` exports and synchronized phase docs to mark `database.py` as implemented while keeping repositories and writer migration as pending.
+- Validation executed for database bootstrap: engine creation + `initialize_database(...)` succeeded and listed all 4 schema tables.
+- Implemented Phase 4b-3 repositories in `src/db/repositories/loan_repo.py` and `src/db/repositories/audit_repo.py` for SQL persistence of loan rows, evaluations, rule traces, and data-load metrics.
+- Added repository package exports in `src/db/repositories/__init__.py` and surfaced repository classes through `src/db/__init__.py`.
+- Added unit coverage in `tests/test_db_repositories.py`; validation run completed: `pytest tests/test_db_repositories.py -q` passed with 3/3 tests.
+- Documentation was synchronized across `08_current_status_next_steps.md`, `03_architecture_modules.md`, `05_audit_module.md`, and root `README.md` to reflect repository-layer completion.
+- Started runtime migration phase for audit dual-write: `src/batch_evaluator.py` now supports optional SQL persistence for evaluations/traces/performance while retaining JSONL compatibility.
+- `src/data_loader.py` now supports optional SQL persistence for pipeline performance records via `sql_audit_database_url`.
+- Added migration-focused tests in `tests/test_batch_evaluator.py` and `tests/test_data_loader.py`; validation run completed: `pytest tests/test_batch_evaluator.py tests/test_data_loader.py -q` passed with 5/5 tests.
+- Completed single-decision dual-write migration in `src/audit_logger.py`: `log_decision_jsonl(...)` now supports optional SQL persistence through repositories while preserving JSONL output compatibility.
+- Added SQL dual-write validation in `tests/test_audit_logger.py`; focused regression run completed: `pytest tests/test_audit_logger.py tests/test_batch_evaluator.py tests/test_data_loader.py -q` passed with 10/10 tests.
+- Context and README were synchronized to mark migration runtime coverage complete (single, batch, pipeline) with remaining work limited to JSONL deprecation cutoff policy.
+- Activated SQL-default cutoff policy for runtime audit sinks: `src/audit_logger.py`, `src/batch_evaluator.py`, and `src/data_loader.py` now support explicit `audit_mode` (`sql`, `dual`, `jsonl`) with SQL as default in policy-aware entrypoints.
+- Added policy-focused coverage in `tests/test_audit_logger.py` to validate SQL-default behavior for single-decision flow (`log_decision_audit(...)`).
+- Focused regression run completed after cutoff activation: `pytest tests/test_audit_logger.py tests/test_batch_evaluator.py tests/test_data_loader.py -q` passed with 11/11 tests.
+- Documentation consistency fix applied after Sonar follow-up: `docs/context/05_audit_module.md` now reflects SQL-default runtime policy in both Status and Decisions sections.
+
 ## 2026-03-29
 - Added file-processing performance logging to `src/data_loader.py` pipeline execution with DataFrame attrs (`file_processing_seconds`, `processed_rows_per_second`) and optional JSONL persistence.
 - Added `tests/test_data_loader.py` to validate pipeline performance attributes and JSONL audit record output.

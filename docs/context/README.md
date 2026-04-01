@@ -14,6 +14,9 @@ Structure:
 - `10_session_history.md`: working log and session continuity.
 - `agents/`: AI-specific adapters.
 
+Project structure note:
+- `src/db/`: Phase 4b persistence module for SQL schema, database connection setup, and repositories.
+
 Recommended load order:
 1. `00_meta.md`
 2. `01_developer_profile.md`

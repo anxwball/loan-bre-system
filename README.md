@@ -16,6 +16,7 @@ La base de datos proviene de Kaggle (**Loan Prediction Problem Dataset**), pero 
 | Motor de reglas deterministas | ✅ Primera version implementada |
 | Evaluacion por lotes BRE vs baseline | ✅ Operativo |
 | Auditoria JSONL + rendimiento de archivos | ✅ Operativo |
+| Persistencia SQLAlchemy Core (Phase 4b) | ✅ Esquema implementado |
 | Tests unitarios | ✅ Cobertura modular activa |
 
 ---
@@ -39,7 +40,12 @@ loan-bre-system/
 │   ├── bre_rules.py       # Reglas hard/soft trazables (R01-R11)
 │   ├── bre_engine.py      # Evaluacion de solicitud -> DecisionResult
 │   ├── batch_evaluator.py # Evaluacion por lotes BRE vs baseline historico
-│   └── audit_logger.py    # Persistencia JSONL para decisiones y lotes
+│   ├── audit_logger.py    # Persistencia JSONL para decisiones y lotes
+│   └── db/
+│       ├── __init__.py    # Exportes publicos de la capa de persistencia
+│       ├── schema.py      # Esquema SQLAlchemy Core (Phase 4b)
+│       ├── database.py    # Engine y bootstrap de persistencia (Phase 4b)
+│       └── repositories/  # Repositorios SQL para solicitudes y auditoria
 ├── tests/
 │   ├── test_rule_engine_decisions.py
 │   ├── test_bre_rules.py
@@ -47,7 +53,8 @@ loan-bre-system/
 │   ├── test_integral_dataset_flow.py
 │   ├── test_batch_evaluator.py
 │   ├── test_audit_logger.py
-│   └── test_data_loader.py
+│   ├── test_data_loader.py
+│   └── test_db_repositories.py
 ├── pyproject.toml
 └── requirements.txt
 ```
@@ -70,6 +77,7 @@ loan-bre-system/
 - Incluye: benchmark por lotes BRE vs labels historicas con CSV de comparacion y resumen agregado.
 - Incluye: auditoria persistente JSONL para decisiones y ejecuciones por lotes.
 - Incluye: logging de rendimiento de procesamiento de archivos (batch y pipeline).
+- Incluye: esquema relacional SQLAlchemy Core para iniciar migracion de auditoria a persistencia SQL.
 
 ### Pipeline de datos
 
@@ -147,12 +155,13 @@ Cada ejecucion corre el pipeline desde raw, persiste features limpios y luego ge
 - matplotlib
 - seaborn
 - pathlib
+- SQLAlchemy
 
 ---
 
 ## Proximos pasos
 
-- Definir si JSONL se mantiene como destino final de auditoria o migra a SQLite.
+- Ejecutar retiro controlado de wrappers JSONL legacy tras validar estabilidad de la ruta SQL por defecto.
 - Implementar capa API (FastAPI) para exponer evaluacion individual y batch.
 - Diseñar la fase ML complementaria sin romper la trazabilidad del BRE.
 - Empaquetar despliegue con Docker y documentacion operativa final.

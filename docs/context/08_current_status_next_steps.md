@@ -26,14 +26,22 @@ Phase 2 status snapshot:
 - Decision score is now clamped to a non-negative floor (`score >= 0`) after compensatory soft rules.
 - Current test run status: `pytest -q` -> 48 passed.
 - Sonar-focused quality fixes are applied: explicit `sonar.python.version=3.13` in `sonar-project.properties` and float-comparison hardening with `pytest.approx(...)` in tests.
-- Phase 2 implementation is complete on `main`; current execution focus is API exposure planning and production-grade audit destination decision.
+- Phase 2 implementation is complete on `main`; current execution focus is Phase 4b persistence enablement as a prerequisite for API exposure.
 
 Pending (prioritized):
-1. Decide if JSONL remains final audit store or migrate to SQLite.
+1. Phase 4b persistence layer (active):
+	- SQLAlchemy Core schema in `src/db/schema.py` is implemented in the current session.
+	- DB connection module in `src/db/database.py` is implemented in the current session.
+	- Repositories under `src/db/repositories/` are implemented in the current session.
+	- Cutoff policy is now active: SQL is the default runtime persistence mode.
+	- `src/audit_logger.py` exposes policy-driven single-decision logging with SQL default and JSONL legacy compatibility wrapper.
+	- `src/batch_evaluator.py` supports explicit `audit_mode` (`sql`, `dual`, `jsonl`) and defaults to SQL policy.
+	- `src/data_loader.py` supports explicit `audit_mode` (`sql`, `dual`, `jsonl`) and defaults to SQL policy.
+	- Remaining step: remove legacy JSONL paths after stabilization window and backward-compatibility signoff.
 2. Phase 3 complementary ML with `scikit-learn`.
 3. Phase 4 REST API with FastAPI.
 4. Docker packaging for final README delivery.
 
 Open decisions:
-- Decide the long-term audit log destination strategy.
+- Define legacy JSONL removal milestone after stabilization and backward-compatibility signoff.
 - Decide whether ML replaces soft rules or is added as a new scored rule.
