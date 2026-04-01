@@ -1,5 +1,13 @@
 # 10. Session History
 
+## 2026-04-01
+- Session executed under context protocol with a pre-Phase-4b blocker pass committed first (`fix(preflight): resolve Phase 4b blockers before schema implementation`).
+- Runtime compatibility fix was applied for Python 3.13 by bumping SQLAlchemy to `2.0.39` after import assertion failure (`fix(preflight): bump SQLAlchemy pin for Python 3.13 compatibility`).
+- Implemented Phase 4b schema module using SQLAlchemy Core in `src/db/schema.py` with shared `metadata`, 4 tables, controlled-field `CheckConstraint`s, and explicit `Index` definitions.
+- Added `src/db/__init__.py` explicit exports for schema symbols to stabilize imports.
+- Updated context docs to reflect active Phase 4b, `src/db/` module reference, and pending progressive deprecation of `src/audit_logger.py`.
+- Validation executed after implementation: `python -c "from src.db.schema import metadata, loan_applications, audit_evaluations, audit_rule_traces, audit_data_loads; print([t for t in metadata.tables])"` returned 4 table names successfully.
+
 ## 2026-03-29
 - Added file-processing performance logging to `src/data_loader.py` pipeline execution with DataFrame attrs (`file_processing_seconds`, `processed_rows_per_second`) and optional JSONL persistence.
 - Added `tests/test_data_loader.py` to validate pipeline performance attributes and JSONL audit record output.
