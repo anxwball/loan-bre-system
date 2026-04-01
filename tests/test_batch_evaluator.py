@@ -6,6 +6,8 @@ import csv
 import json
 from pathlib import Path
 
+import pytest
+
 from src.batch_evaluator import evaluate_batch_against_baseline
 from src.db.database import build_sqlite_url, create_db_engine, dispose_engine, initialize_database
 from src.db.repositories import AuditRepository, LoanRepository
@@ -132,7 +134,7 @@ def test_batch_evaluation_computes_expected_metrics(tmp_path: Path) -> None:
     assert summary.predicted_denied_actual_denied == 1
     assert summary.predicted_approved_actual_denied == 0
     assert summary.predicted_denied_actual_approved == 0
-    assert summary.accuracy == 1.0
+    assert summary.accuracy == pytest.approx(1.0)
     assert summary.file_processing_seconds >= 0.0
     assert summary.compared_rows_per_second >= 0.0
 
