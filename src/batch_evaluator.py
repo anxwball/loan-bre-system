@@ -153,6 +153,24 @@ def _resolve_audit_mode(audit_mode: str | None, default_mode: str = "sql") -> st
     return effective_mode
 
 
+def _resolve_storage_label(persist_jsonl: bool, persist_sql: bool) -> str:
+    """Resolve storage label from effective sink toggles.
+
+    Args:
+        persist_jsonl: Whether JSONL persistence is enabled.
+        persist_sql: Whether SQL persistence is enabled.
+
+    Returns:
+        Storage label used in emitted audit payloads.
+    """
+
+    if persist_jsonl and persist_sql:
+        return "jsonl+sql"
+    if persist_jsonl:
+        return "jsonl"
+    return "sql"
+
+
 def evaluate_batch_against_baseline(
     features_path: Path = DEFAULT_FEATURES_PATH,
     labels_path: Path = DEFAULT_LABELS_PATH,
@@ -198,12 +216,9 @@ def evaluate_batch_against_baseline(
     effective_audit_mode = _resolve_audit_mode(audit_mode)
     persist_jsonl = effective_audit_mode in {"dual", "jsonl"}
     persist_sql = effective_audit_mode in {"dual", "sql"}
-    storage_label = (
-        "jsonl+sql"
-        if persist_jsonl and persist_sql
-        else "jsonl"
-        if persist_jsonl
-        else "sql"
+    storage_label = _resolve_storage_label(
+        persist_jsonl=persist_jsonl,
+        persist_sql=persist_sql,
     )
 
     sql_engine = None

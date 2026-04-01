@@ -128,6 +128,24 @@ def _resolve_audit_mode(audit_mode: str | None, default_mode: str) -> str:
     return effective_mode
 
 
+def _resolve_storage_label(persist_jsonl: bool, persist_sql: bool) -> str:
+    """Resolve storage label from effective sink toggles.
+
+    Args:
+        persist_jsonl: Whether JSONL persistence is enabled.
+        persist_sql: Whether SQL persistence is enabled.
+
+    Returns:
+        Storage label used in audit payloads.
+    """
+
+    if persist_jsonl and persist_sql:
+        return "jsonl+sql"
+    if persist_jsonl:
+        return "jsonl"
+    return "sql"
+
+
 def _persist_decision_sql(
     app: LoanApplication,
     decision: DecisionResult,
@@ -205,9 +223,9 @@ def log_decision_audit(
     effective_mode = _resolve_audit_mode(audit_mode, default_mode="sql")
     persist_jsonl = effective_mode in {"dual", "jsonl"}
     persist_sql = effective_mode in {"dual", "sql"}
-
-    storage_label = (
-        "jsonl+sql" if persist_jsonl and persist_sql else "jsonl" if persist_jsonl else "sql"
+    storage_label = _resolve_storage_label(
+        persist_jsonl=persist_jsonl,
+        persist_sql=persist_sql,
     )
 
     persisted_path: Path | None = None
