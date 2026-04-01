@@ -18,7 +18,7 @@ Implemented components:
 
 Decisions already made:
 - Traceability is provided by `DecisionResult.rules_triggered` and summary fields.
-- JSONL remains the active runtime path during migration, but long-term persistence direction is SQL-based.
+- SQL is the active default runtime path; JSONL remains an explicit legacy compatibility mode (`audit_mode=jsonl` or `audit_mode=dual`) during deprecation.
 
 Minimum expected log fields:
 

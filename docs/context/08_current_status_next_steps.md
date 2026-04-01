@@ -43,5 +43,5 @@ Pending (prioritized):
 4. Docker packaging for final README delivery.
 
 Open decisions:
-- Define migration sequencing between JSONL and SQL persistence during Phase 4b.
+- Define legacy JSONL removal milestone after stabilization and backward-compatibility signoff.
 - Decide whether ML replaces soft rules or is added as a new scored rule.

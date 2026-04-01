@@ -24,6 +24,7 @@
 - Activated SQL-default cutoff policy for runtime audit sinks: `src/audit_logger.py`, `src/batch_evaluator.py`, and `src/data_loader.py` now support explicit `audit_mode` (`sql`, `dual`, `jsonl`) with SQL as default in policy-aware entrypoints.
 - Added policy-focused coverage in `tests/test_audit_logger.py` to validate SQL-default behavior for single-decision flow (`log_decision_audit(...)`).
 - Focused regression run completed after cutoff activation: `pytest tests/test_audit_logger.py tests/test_batch_evaluator.py tests/test_data_loader.py -q` passed with 11/11 tests.
+- Documentation consistency fix applied after Sonar follow-up: `docs/context/05_audit_module.md` now reflects SQL-default runtime policy in both Status and Decisions sections.
 
 ## 2026-03-29
 - Added file-processing performance logging to `src/data_loader.py` pipeline execution with DataFrame attrs (`file_processing_seconds`, `processed_rows_per_second`) and optional JSONL persistence.
