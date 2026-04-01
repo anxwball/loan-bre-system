@@ -26,6 +26,7 @@ from src.loan_application import LoanApplication
 DEFAULT_FEATURES_PATH = Path("data/processed/loans_cleaned.csv")
 DEFAULT_LABELS_PATH = Path("data/processed/loan_labels.csv")
 DEFAULT_OUTPUT_PATH = Path("data/processed/batch_evaluation_latest.csv")
+SUPPORTED_AUDIT_MODES = {"sql", "dual", "jsonl"}
 
 
 @dataclass(frozen=True)
@@ -128,12 +129,37 @@ def _load_labels(labels_path: Path) -> dict[str, str]:
     return labels_by_id
 
 
+def _resolve_audit_mode(audit_mode: str | None, default_mode: str = "sql") -> str:
+    """Resolve and validate audit sink policy for batch processing.
+
+    Args:
+        audit_mode: Optional explicit sink policy (`sql`, `dual`, `jsonl`).
+        default_mode: Fallback mode used when `audit_mode` is None.
+
+    Returns:
+        Effective audit mode.
+
+    Raises:
+        ValueError: If mode is not supported.
+    """
+
+    effective_mode = default_mode if audit_mode is None else audit_mode.strip().lower()
+    if effective_mode not in SUPPORTED_AUDIT_MODES:
+        raise ValueError(
+            f"Unsupported audit_mode: {audit_mode!r}. "
+            f"Expected one of {sorted(SUPPORTED_AUDIT_MODES)}."
+        )
+
+    return effective_mode
+
+
 def evaluate_batch_against_baseline(
     features_path: Path = DEFAULT_FEATURES_PATH,
     labels_path: Path = DEFAULT_LABELS_PATH,
     output_path: Path | None = DEFAULT_OUTPUT_PATH,
     batch_audit_path: Path | None = None,
     sql_audit_database_url: str | None = None,
+    audit_mode: str | None = None,
 ) -> BatchEvaluationSummary:
     """Evaluate all features and compare BRE decisions against baseline labels.
 
@@ -144,6 +170,8 @@ def evaluate_batch_against_baseline(
         batch_audit_path: Optional destination for line-delimited audit records.
         sql_audit_database_url: Optional SQLAlchemy URL used to dual-write
             audit records into SQL persistence during migration.
+        audit_mode: Optional sink policy (`sql`, `dual`, `jsonl`). Defaults
+            to `sql` for runtime cutoff progression.
 
     Returns:
         BatchEvaluationSummary with aggregate evaluation metrics.
@@ -167,12 +195,23 @@ def evaluate_batch_against_baseline(
     output_rows: list[dict[str, object]] = []
     processing_start = perf_counter()
 
+    effective_audit_mode = _resolve_audit_mode(audit_mode)
+    persist_jsonl = effective_audit_mode in {"dual", "jsonl"}
+    persist_sql = effective_audit_mode in {"dual", "sql"}
+    storage_label = (
+        "jsonl+sql"
+        if persist_jsonl and persist_sql
+        else "jsonl"
+        if persist_jsonl
+        else "sql"
+    )
+
     sql_engine = None
     loan_repository = None
     audit_repository = None
     batch_run_id = batch_audit_path.stem if batch_audit_path is not None else None
 
-    if sql_audit_database_url is not None:
+    if persist_sql:
         sql_engine = create_db_engine(database_url=sql_audit_database_url)
         initialize_database(sql_engine)
         loan_repository = LoanRepository(sql_engine)
@@ -227,8 +266,12 @@ def evaluate_batch_against_baseline(
                     }
                 )
 
-                if batch_audit_path is not None:
-                    audit_record = build_decision_audit_record(app=app, decision=decision)
+                if persist_jsonl and batch_audit_path is not None:
+                    audit_record = build_decision_audit_record(
+                        app=app,
+                        decision=decision,
+                        audit_storage=storage_label,
+                    )
                     audit_record["mode"] = "batch"
                     audit_record["predicted_status"] = predicted_label
                     audit_record["baseline_status"] = baseline_label
@@ -281,10 +324,11 @@ def evaluate_batch_against_baseline(
             compared_rows / file_processing_seconds if file_processing_seconds > 0 else 0.0
         )
 
-        if batch_audit_path is not None:
+        if persist_jsonl and batch_audit_path is not None:
             append_jsonl_record(
                 {
                     "mode": "batch_performance",
+                    "audit_storage": storage_label,
                     "features_path": str(features_path),
                     "labels_path": str(labels_path),
                     "compared_rows": compared_rows,
@@ -327,7 +371,10 @@ def main() -> None:
     """Run batch evaluation with default paths and print compact metrics."""
 
     audit_path = build_versioned_batch_audit_path()
-    summary = evaluate_batch_against_baseline(batch_audit_path=audit_path)
+    summary = evaluate_batch_against_baseline(
+        batch_audit_path=audit_path,
+        audit_mode="dual",
+    )
     print("Batch evaluation complete")
     print(f"Compared rows: {summary.compared_rows}/{summary.total_feature_rows}")
     print(f"Accuracy: {summary.accuracy:.4f}")

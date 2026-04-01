@@ -41,6 +41,7 @@ def test_run_pipeline_exposes_performance_attrs_and_writes_log(
     result_df = data_loader.run_pipeline(
         input_path="dummy.csv",
         performance_log_path=performance_log_path,
+        audit_mode="jsonl",
     )
 
     assert "file_processing_seconds" in result_df.attrs
@@ -90,6 +91,7 @@ def test_run_pipeline_dual_writes_performance_to_sql(
         input_path="dummy.csv",
         performance_log_path=None,
         sql_audit_database_url=db_url,
+        audit_mode="sql",
     )
 
     assert "file_processing_seconds" in result_df.attrs

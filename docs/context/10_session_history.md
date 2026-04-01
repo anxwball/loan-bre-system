@@ -21,6 +21,9 @@
 - Completed single-decision dual-write migration in `src/audit_logger.py`: `log_decision_jsonl(...)` now supports optional SQL persistence through repositories while preserving JSONL output compatibility.
 - Added SQL dual-write validation in `tests/test_audit_logger.py`; focused regression run completed: `pytest tests/test_audit_logger.py tests/test_batch_evaluator.py tests/test_data_loader.py -q` passed with 10/10 tests.
 - Context and README were synchronized to mark migration runtime coverage complete (single, batch, pipeline) with remaining work limited to JSONL deprecation cutoff policy.
+- Activated SQL-default cutoff policy for runtime audit sinks: `src/audit_logger.py`, `src/batch_evaluator.py`, and `src/data_loader.py` now support explicit `audit_mode` (`sql`, `dual`, `jsonl`) with SQL as default in policy-aware entrypoints.
+- Added policy-focused coverage in `tests/test_audit_logger.py` to validate SQL-default behavior for single-decision flow (`log_decision_audit(...)`).
+- Focused regression run completed after cutoff activation: `pytest tests/test_audit_logger.py tests/test_batch_evaluator.py tests/test_data_loader.py -q` passed with 11/11 tests.
 
 ## 2026-03-29
 - Added file-processing performance logging to `src/data_loader.py` pipeline execution with DataFrame attrs (`file_processing_seconds`, `processed_rows_per_second`) and optional JSONL persistence.

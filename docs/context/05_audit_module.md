@@ -1,7 +1,7 @@
 # 05. Audit Module
 
 Status:
-- JSONL baseline is implemented and active; SQL persistence transition is in progress under Phase 4b.
+- SQL persistence is now the default runtime path; JSONL remains as legacy compatibility mode during deprecation.
 
 Implemented components:
 - `src/audit_logger.py` provides reusable JSONL persistence helpers.
@@ -14,6 +14,7 @@ Implemented components:
 - `src/db/repositories/loan_repo.py` and `src/db/repositories/audit_repo.py` now provide SQL persistence operations for loan rows, evaluations, rule traces, and data-load metrics.
 - `src/batch_evaluator.py` now supports optional SQL dual-write using repositories while preserving JSONL compatibility.
 - `src/data_loader.py` now supports optional SQL dual-write for pipeline performance records.
+- Runtime audit policy now supports explicit modes (`sql`, `dual`, `jsonl`) with SQL as default.
 
 Decisions already made:
 - Traceability is provided by `DecisionResult.rules_triggered` and summary fields.
@@ -27,4 +28,4 @@ rules_triggered (JSON), model_version
 ```
 
 Pending decision:
-- Define deprecation cutoff for JSONL runtime writes once SQL persistence is promoted to default.
+- Define removal milestone for JSONL compatibility wrappers after production-parity validation.

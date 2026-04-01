@@ -161,7 +161,7 @@ Cada ejecucion corre el pipeline desde raw, persiste features limpios y luego ge
 
 ## Proximos pasos
 
-- Definir y ejecutar cutoff de deprecacion JSONL cuando la persistencia SQL pase a ser ruta por defecto.
+- Ejecutar retiro controlado de wrappers JSONL legacy tras validar estabilidad de la ruta SQL por defecto.
 - Implementar capa API (FastAPI) para exponer evaluacion individual y batch.
 - Diseñar la fase ML complementaria sin romper la trazabilidad del BRE.
 - Empaquetar despliegue con Docker y documentacion operativa final.

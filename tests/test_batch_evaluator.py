@@ -119,6 +119,7 @@ def test_batch_evaluation_computes_expected_metrics(tmp_path: Path) -> None:
         features_path=features_path,
         labels_path=labels_path,
         output_path=output_path,
+        audit_mode="jsonl",
     )
 
     assert summary.total_feature_rows == 4
@@ -196,6 +197,7 @@ def test_batch_evaluation_writes_jsonl_audit_when_path_is_provided(tmp_path: Pat
         labels_path=labels_path,
         output_path=None,
         batch_audit_path=batch_audit_path,
+        audit_mode="jsonl",
     )
 
     assert summary.compared_rows == 1
@@ -273,6 +275,7 @@ def test_batch_evaluation_dual_writes_audit_into_sql(tmp_path: Path) -> None:
         output_path=None,
         batch_audit_path=None,
         sql_audit_database_url=build_sqlite_url(db_path),
+        audit_mode="sql",
     )
 
     assert summary.compared_rows == 1

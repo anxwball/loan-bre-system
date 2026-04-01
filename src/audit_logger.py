@@ -21,6 +21,7 @@ from src.loan_application import LoanApplication
 
 DEFAULT_AUDIT_JSONL_PATH = Path("data/audit/decisions_latest.jsonl")
 DEFAULT_BATCH_AUDIT_DIR = Path("data/audit/batch")
+SUPPORTED_AUDIT_MODES = {"sql", "dual", "jsonl"}
 
 
 def build_versioned_batch_audit_path(
@@ -103,10 +104,34 @@ def build_decision_audit_record(
     }
 
 
+def _resolve_audit_mode(audit_mode: str | None, default_mode: str) -> str:
+    """Resolve and validate audit mode for runtime persistence.
+
+    Args:
+        audit_mode: Optional explicit runtime audit mode.
+        default_mode: Default mode used when `audit_mode` is None.
+
+    Returns:
+        Effective audit mode (`sql`, `dual`, or `jsonl`).
+
+    Raises:
+        ValueError: If mode is not supported.
+    """
+
+    effective_mode = default_mode if audit_mode is None else audit_mode.strip().lower()
+    if effective_mode not in SUPPORTED_AUDIT_MODES:
+        raise ValueError(
+            f"Unsupported audit_mode: {audit_mode!r}. "
+            f"Expected one of {sorted(SUPPORTED_AUDIT_MODES)}."
+        )
+
+    return effective_mode
+
+
 def _persist_decision_sql(
     app: LoanApplication,
     decision: DecisionResult,
-    sql_audit_database_url: str,
+    sql_audit_database_url: str | None,
     applicant_id: str,
 ) -> None:
     """Persist one single-decision audit flow to SQL repositories.
@@ -114,7 +139,8 @@ def _persist_decision_sql(
     Args:
         app: Loan application evaluated by the engine.
         decision: Final decision returned by RuleEngine.
-        sql_audit_database_url: SQLAlchemy database URL for audit persistence.
+        sql_audit_database_url: Optional SQLAlchemy database URL for audit
+            persistence. If omitted, the default database configuration is used.
         applicant_id: Stable applicant identifier for persistence rows.
 
     Returns:
@@ -151,6 +177,65 @@ def _persist_decision_sql(
         dispose_engine(sql_engine)
 
 
+def log_decision_audit(
+    app: LoanApplication,
+    decision: DecisionResult,
+    output_path: Path = DEFAULT_AUDIT_JSONL_PATH,
+    model_version: str = "bre-v1",
+    sql_audit_database_url: str | None = None,
+    applicant_id: str | None = None,
+    audit_mode: str | None = None,
+) -> dict[str, Any]:
+    """Persist one decision audit using policy-driven sink selection.
+
+    Args:
+        app: Loan application evaluated by the engine.
+        decision: Final decision returned by RuleEngine.
+        output_path: Destination .jsonl path for jsonl/dual modes.
+        model_version: Version string for the decisioning logic.
+        sql_audit_database_url: Optional SQLAlchemy URL for SQL persistence.
+        applicant_id: Optional applicant identifier for SQL rows.
+        audit_mode: Optional sink policy (`sql`, `dual`, `jsonl`). Defaults to
+            `sql` for cutoff progression.
+
+    Returns:
+        Dictionary with effective mode and persistence outcomes.
+    """
+
+    effective_mode = _resolve_audit_mode(audit_mode, default_mode="sql")
+    persist_jsonl = effective_mode in {"dual", "jsonl"}
+    persist_sql = effective_mode in {"dual", "sql"}
+
+    storage_label = (
+        "jsonl+sql" if persist_jsonl and persist_sql else "jsonl" if persist_jsonl else "sql"
+    )
+
+    persisted_path: Path | None = None
+    if persist_jsonl:
+        audit_record = build_decision_audit_record(
+            app=app,
+            decision=decision,
+            model_version=model_version,
+            audit_storage=storage_label,
+        )
+        persisted_path = append_jsonl_record(audit_record, output_path)
+
+    if persist_sql:
+        resolved_applicant_id = applicant_id if applicant_id is not None else app.loan_id
+        _persist_decision_sql(
+            app=app,
+            decision=decision,
+            sql_audit_database_url=sql_audit_database_url,
+            applicant_id=resolved_applicant_id,
+        )
+
+    return {
+        "audit_mode": effective_mode,
+        "jsonl_path": str(persisted_path) if persisted_path is not None else None,
+        "sql_persisted": persist_sql,
+    }
+
+
 def log_decision_jsonl(
     app: LoanApplication,
     decision: DecisionResult,
@@ -174,22 +259,19 @@ def log_decision_jsonl(
         Resolved path of the persisted .jsonl file.
     """
 
-    storage_label = "jsonl+sql" if sql_audit_database_url is not None else "jsonl"
-    audit_record = build_decision_audit_record(
+    effective_mode = "dual" if sql_audit_database_url is not None else "jsonl"
+    result = log_decision_audit(
         app=app,
         decision=decision,
+        output_path=output_path,
         model_version=model_version,
-        audit_storage=storage_label,
+        sql_audit_database_url=sql_audit_database_url,
+        applicant_id=applicant_id,
+        audit_mode=effective_mode,
     )
-    persisted_path = append_jsonl_record(audit_record, output_path)
 
-    if sql_audit_database_url is not None:
-        resolved_applicant_id = applicant_id if applicant_id is not None else app.loan_id
-        _persist_decision_sql(
-            app=app,
-            decision=decision,
-            sql_audit_database_url=sql_audit_database_url,
-            applicant_id=resolved_applicant_id,
-        )
+    jsonl_path = result["jsonl_path"]
+    if jsonl_path is None:
+        raise RuntimeError("log_decision_jsonl expected JSONL persistence but no path was generated.")
 
-    return persisted_path
+    return Path(jsonl_path)

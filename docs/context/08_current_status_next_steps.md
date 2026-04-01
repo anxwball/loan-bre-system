@@ -33,10 +33,11 @@ Pending (prioritized):
 	- SQLAlchemy Core schema in `src/db/schema.py` is implemented in the current session.
 	- DB connection module in `src/db/database.py` is implemented in the current session.
 	- Repositories under `src/db/repositories/` are implemented in the current session.
-	- `src/audit_logger.py` now supports optional SQL dual-write for single-decision flow while preserving JSONL compatibility.
-	- `src/batch_evaluator.py` now supports optional SQL dual-write for evaluations, traces, and performance metrics.
-	- `src/data_loader.py` now supports optional SQL dual-write for pipeline performance metrics.
-	- Remaining step: define and execute the JSONL deprecation cutoff policy once SQL persistence becomes default.
+	- Cutoff policy is now active: SQL is the default runtime persistence mode.
+	- `src/audit_logger.py` exposes policy-driven single-decision logging with SQL default and JSONL legacy compatibility wrapper.
+	- `src/batch_evaluator.py` supports explicit `audit_mode` (`sql`, `dual`, `jsonl`) and defaults to SQL policy.
+	- `src/data_loader.py` supports explicit `audit_mode` (`sql`, `dual`, `jsonl`) and defaults to SQL policy.
+	- Remaining step: remove legacy JSONL paths after stabilization window and backward-compatibility signoff.
 2. Phase 3 complementary ML with `scikit-learn`.
 3. Phase 4 REST API with FastAPI.
 4. Docker packaging for final README delivery.
