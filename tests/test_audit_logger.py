@@ -5,6 +5,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+from src.db.database import build_sqlite_url, create_db_engine, dispose_engine, initialize_database
+from src.db.repositories import AuditRepository, LoanRepository
 from src.audit_logger import (
     append_jsonl_record,
     build_versioned_batch_audit_path,
@@ -79,3 +81,47 @@ def test_build_versioned_batch_audit_path_creates_versioned_filename(tmp_path: P
     assert path.parent == tmp_path
     assert path.name.startswith("batch_decisions_")
     assert path.suffix == ".jsonl"
+
+
+def test_log_decision_jsonl_dual_writes_to_sql(
+    tmp_path: Path,
+    engine,
+    build_application,
+) -> None:
+    """Logger should persist single-decision rows in JSONL and SQL when configured."""
+
+    app = build_application(loan_id="LP_SINGLE_SQL_001")
+    decision = engine.evaluate(app)
+    output_path = tmp_path / "decision_explanations.jsonl"
+    db_path = tmp_path / "audit_single.db"
+    db_url = build_sqlite_url(db_path)
+
+    created = log_decision_jsonl(
+        app=app,
+        decision=decision,
+        output_path=output_path,
+        model_version="bre-v1",
+        sql_audit_database_url=db_url,
+    )
+
+    assert created == output_path.resolve()
+    payload = json.loads(output_path.read_text(encoding="utf-8").splitlines()[0])
+    assert payload["audit_storage"] == "jsonl+sql"
+
+    verify_engine = create_db_engine(database_url=db_url)
+    initialize_database(verify_engine)
+    try:
+        loan_repository = LoanRepository(verify_engine)
+        audit_repository = AuditRepository(verify_engine)
+
+        loan_row = loan_repository.get_by_loan_id("LP_SINGLE_SQL_001")
+        assert loan_row is not None
+
+        evaluations = audit_repository.list_evaluations_for_application(int(loan_row["id"]))
+        assert len(evaluations) == 1
+        assert evaluations[0]["mode"] == "single"
+
+        traces = audit_repository.list_rule_traces(int(evaluations[0]["id"]))
+        assert len(traces) == len(decision.rules_triggered)
+    finally:
+        dispose_engine(verify_engine)

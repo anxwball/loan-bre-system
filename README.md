@@ -161,7 +161,7 @@ Cada ejecucion corre el pipeline desde raw, persiste features limpios y luego ge
 
 ## Proximos pasos
 
-- Completar migracion de auditoria single-decision desde `src/audit_logger.py` hacia SQL y retirar JSONL de forma progresiva.
+- Definir y ejecutar cutoff de deprecacion JSONL cuando la persistencia SQL pase a ser ruta por defecto.
 - Implementar capa API (FastAPI) para exponer evaluacion individual y batch.
 - Diseñar la fase ML complementaria sin romper la trazabilidad del BRE.
 - Empaquetar despliegue con Docker y documentacion operativa final.

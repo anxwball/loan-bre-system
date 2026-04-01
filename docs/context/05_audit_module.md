@@ -5,6 +5,7 @@ Status:
 
 Implemented components:
 - `src/audit_logger.py` provides reusable JSONL persistence helpers.
+- `src/audit_logger.py` now supports optional SQL dual-write for single-decision persistence.
 - Decision logging is available via `log_decision_jsonl(...)` and `build_decision_audit_record(...)`.
 - Batch evaluation now supports decision-level JSONL rows plus a batch performance record.
 - Data pipeline execution now logs file-processing performance metrics to JSONL.
@@ -26,4 +27,4 @@ rules_triggered (JSON), model_version
 ```
 
 Pending decision:
-- Final migration sequencing for single-decision flow from `src/audit_logger.py` to SQL persistence and deprecation policy cutoff.
+- Define deprecation cutoff for JSONL runtime writes once SQL persistence is promoted to default.
