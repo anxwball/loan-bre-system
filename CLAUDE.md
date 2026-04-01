@@ -26,5 +26,9 @@ Language convention:
 Operational rule:
 - Update `docs/context/10_session_history.md` at the end of each work session.
 
+Execution status:
+- Phase 4b persistence layer is currently in progress.
+- `src/audit_logger.py` remains active but is pending progressive deprecation as SQL persistence modules are completed.
+
 Documentation rule:
 - Follow `docs/context/06_code_conventions.md` for module-level executive docstrings, technical docstrings on functions/classes, and sparse imperative critical comments.
