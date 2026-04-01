@@ -7,6 +7,7 @@
 - Added `src/db/__init__.py` explicit exports for schema symbols to stabilize imports.
 - Updated context docs to reflect active Phase 4b, `src/db/` module reference, and pending progressive deprecation of `src/audit_logger.py`.
 - Validation executed after implementation: `python -c "from src.db.schema import metadata, loan_applications, audit_evaluations, audit_rule_traces, audit_data_loads; print([t for t in metadata.tables])"` returned 4 table names successfully.
+- Final documentation pass completed for phase closure: updated architecture map (`03_architecture_modules.md`), audit transition status (`05_audit_module.md`), and root `README.md` to reflect Phase 4b persistence progress.
 
 ## 2026-03-29
 - Added file-processing performance logging to `src/data_loader.py` pipeline execution with DataFrame attrs (`file_processing_seconds`, `processed_rows_per_second`) and optional JSONL persistence.

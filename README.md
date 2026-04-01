@@ -16,6 +16,7 @@ La base de datos proviene de Kaggle (**Loan Prediction Problem Dataset**), pero 
 | Motor de reglas deterministas | ✅ Primera version implementada |
 | Evaluacion por lotes BRE vs baseline | ✅ Operativo |
 | Auditoria JSONL + rendimiento de archivos | ✅ Operativo |
+| Persistencia SQLAlchemy Core (Phase 4b) | ✅ Esquema implementado |
 | Tests unitarios | ✅ Cobertura modular activa |
 
 ---
@@ -39,7 +40,10 @@ loan-bre-system/
 │   ├── bre_rules.py       # Reglas hard/soft trazables (R01-R11)
 │   ├── bre_engine.py      # Evaluacion de solicitud -> DecisionResult
 │   ├── batch_evaluator.py # Evaluacion por lotes BRE vs baseline historico
-│   └── audit_logger.py    # Persistencia JSONL para decisiones y lotes
+│   ├── audit_logger.py    # Persistencia JSONL para decisiones y lotes
+│   └── db/
+│       ├── __init__.py    # Exportes publicos de la capa de persistencia
+│       └── schema.py      # Esquema SQLAlchemy Core (Phase 4b)
 ├── tests/
 │   ├── test_rule_engine_decisions.py
 │   ├── test_bre_rules.py
@@ -70,6 +74,7 @@ loan-bre-system/
 - Incluye: benchmark por lotes BRE vs labels historicas con CSV de comparacion y resumen agregado.
 - Incluye: auditoria persistente JSONL para decisiones y ejecuciones por lotes.
 - Incluye: logging de rendimiento de procesamiento de archivos (batch y pipeline).
+- Incluye: esquema relacional SQLAlchemy Core para iniciar migracion de auditoria a persistencia SQL.
 
 ### Pipeline de datos
 
@@ -147,12 +152,14 @@ Cada ejecucion corre el pipeline desde raw, persiste features limpios y luego ge
 - matplotlib
 - seaborn
 - pathlib
+- SQLAlchemy
 
 ---
 
 ## Proximos pasos
 
-- Definir si JSONL se mantiene como destino final de auditoria o migra a SQLite.
+- Implementar `src/db/database.py` (engine + fabrica de conexiones).
+- Implementar repositorios en `src/db/repositories/` y migrar escrituras de auditoria de JSONL a SQL de forma progresiva.
 - Implementar capa API (FastAPI) para exponer evaluacion individual y batch.
 - Diseñar la fase ML complementaria sin romper la trazabilidad del BRE.
 - Empaquetar despliegue con Docker y documentacion operativa final.
