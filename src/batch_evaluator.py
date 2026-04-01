@@ -8,7 +8,7 @@ aggregate metrics and can optionally persist row-level comparison output.
 from __future__ import annotations
 
 import csv
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from time import perf_counter
 
@@ -62,6 +62,23 @@ class BatchEvaluationSummary:
     accuracy: float
     file_processing_seconds: float
     compared_rows_per_second: float
+
+
+@dataclass
+class _BatchRuntimeState:
+    """Keep mutable counters and row outputs during batch evaluation."""
+
+    total_feature_rows: int = 0
+    compared_rows: int = 0
+    missing_label_rows: int = 0
+    invalid_row_rows: int = 0
+    matched_rows: int = 0
+    mismatched_rows: int = 0
+    predicted_approved_actual_approved: int = 0
+    predicted_approved_actual_denied: int = 0
+    predicted_denied_actual_approved: int = 0
+    predicted_denied_actual_denied: int = 0
+    output_rows: list[dict[str, object]] = field(default_factory=list)
 
 
 def _normalize_label(raw_label: str) -> str:
@@ -171,6 +188,259 @@ def _resolve_storage_label(persist_jsonl: bool, persist_sql: bool) -> str:
     return "sql"
 
 
+def _build_sql_repositories(
+    persist_sql: bool,
+    sql_audit_database_url: str | None,
+) -> tuple[object | None, LoanRepository | None, AuditRepository | None]:
+    """Create SQL engine and repositories only when SQL persistence is enabled."""
+
+    if not persist_sql:
+        return None, None, None
+
+    sql_engine = create_db_engine(database_url=sql_audit_database_url)
+    initialize_database(sql_engine)
+    loan_repository = LoanRepository(sql_engine)
+    audit_repository = AuditRepository(sql_engine)
+    return sql_engine, loan_repository, audit_repository
+
+
+def _update_confusion_counters(
+    state: _BatchRuntimeState,
+    predicted_label: str,
+    baseline_label: str,
+) -> bool:
+    """Update comparison counters and return match status for one prediction."""
+
+    state.compared_rows += 1
+    is_match = predicted_label == baseline_label
+
+    if is_match:
+        state.matched_rows += 1
+    else:
+        state.mismatched_rows += 1
+
+    if predicted_label == "Approved" and baseline_label == "Approved":
+        state.predicted_approved_actual_approved += 1
+    elif predicted_label == "Approved" and baseline_label == "Denied":
+        state.predicted_approved_actual_denied += 1
+    elif predicted_label == "Denied" and baseline_label == "Approved":
+        state.predicted_denied_actual_approved += 1
+    else:
+        state.predicted_denied_actual_denied += 1
+
+    return is_match
+
+
+def _append_output_row(
+    state: _BatchRuntimeState,
+    loan_id: str,
+    predicted_label: str,
+    baseline_label: str,
+    is_match: bool,
+    decision,
+) -> None:
+    """Append one row-level comparison payload for CSV output."""
+
+    state.output_rows.append(
+        {
+            "loan_id": loan_id,
+            "predicted_status": predicted_label,
+            "baseline_status": baseline_label,
+            "matched": is_match,
+            "score": decision.score,
+            "hard_rejection": decision.hard_rejection,
+            "flagged_for_review": decision.flagged_for_review,
+            "decision_summary": decision.summary(),
+        }
+    )
+
+
+def _persist_jsonl_decision(
+    app: LoanApplication,
+    decision,
+    predicted_label: str,
+    baseline_label: str,
+    is_match: bool,
+    storage_label: str,
+    batch_audit_path: Path,
+) -> None:
+    """Persist one compared decision row to JSONL audit output."""
+
+    audit_record = build_decision_audit_record(
+        app=app,
+        decision=decision,
+        audit_storage=storage_label,
+    )
+    audit_record["mode"] = "batch"
+    audit_record["predicted_status"] = predicted_label
+    audit_record["baseline_status"] = baseline_label
+    audit_record["matched"] = is_match
+    append_jsonl_record(audit_record, batch_audit_path)
+
+
+def _persist_sql_decision(
+    loan_repository: LoanRepository,
+    audit_repository: AuditRepository,
+    app: LoanApplication,
+    decision,
+    baseline_label: str,
+    features_path: Path,
+    batch_run_id: str | None,
+) -> None:
+    """Persist one compared decision row to SQL audit tables."""
+
+    persisted_loan = loan_repository.get_by_loan_id(app.loan_id)
+    if persisted_loan is None:
+        loan_application_id = loan_repository.insert_application(
+            app=app,
+            applicant_id=app.loan_id,
+            source_file=str(features_path),
+            loan_status=baseline_label,
+        )
+    else:
+        loan_application_id = int(persisted_loan["id"])
+
+    evaluation_id = audit_repository.insert_evaluation(
+        loan_application_id=loan_application_id,
+        decision=decision,
+        mode="batch",
+        batch_id=batch_run_id,
+    )
+    audit_repository.insert_rule_traces(
+        evaluation_id=evaluation_id,
+        rules=decision.rules_triggered,
+    )
+
+
+def _process_feature_row(
+    row: dict[str, str],
+    labels_by_id: dict[str, str],
+    engine: RuleEngine,
+    state: _BatchRuntimeState,
+    persist_jsonl: bool,
+    batch_audit_path: Path | None,
+    storage_label: str,
+    loan_repository: LoanRepository | None,
+    audit_repository: AuditRepository | None,
+    features_path: Path,
+    batch_run_id: str | None,
+) -> None:
+    """Evaluate one feature row and update in-memory and persisted outputs."""
+
+    state.total_feature_rows += 1
+    loan_id = row["loan_id"]
+    baseline_label = labels_by_id.get(loan_id)
+    if baseline_label is None:
+        state.missing_label_rows += 1
+        return
+
+    try:
+        app = _coerce_row_to_application(row)
+        decision = engine.evaluate(app)
+    except (ValueError, KeyError):
+        state.invalid_row_rows += 1
+        return
+
+    predicted_label = "Approved" if decision.approved else "Denied"
+    is_match = _update_confusion_counters(
+        state=state,
+        predicted_label=predicted_label,
+        baseline_label=baseline_label,
+    )
+
+    _append_output_row(
+        state=state,
+        loan_id=loan_id,
+        predicted_label=predicted_label,
+        baseline_label=baseline_label,
+        is_match=is_match,
+        decision=decision,
+    )
+
+    if persist_jsonl and batch_audit_path is not None:
+        _persist_jsonl_decision(
+            app=app,
+            decision=decision,
+            predicted_label=predicted_label,
+            baseline_label=baseline_label,
+            is_match=is_match,
+            storage_label=storage_label,
+            batch_audit_path=batch_audit_path,
+        )
+
+    if loan_repository is not None and audit_repository is not None:
+        _persist_sql_decision(
+            loan_repository=loan_repository,
+            audit_repository=audit_repository,
+            app=app,
+            decision=decision,
+            baseline_label=baseline_label,
+            features_path=features_path,
+            batch_run_id=batch_run_id,
+        )
+
+
+def _write_output_rows(output_path: Path | None, output_rows: list[dict[str, object]]) -> None:
+    """Persist row-level comparison CSV when output is enabled."""
+
+    if output_path is None:
+        return
+
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    with output_path.open("w", newline="", encoding="utf-8") as output_file:
+        fieldnames = [
+            "loan_id",
+            "predicted_status",
+            "baseline_status",
+            "matched",
+            "score",
+            "hard_rejection",
+            "flagged_for_review",
+            "decision_summary",
+        ]
+        writer = csv.DictWriter(output_file, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(output_rows)
+
+
+def _compute_performance_metrics(
+    compared_rows: int,
+    processing_start: float,
+) -> tuple[float, float]:
+    """Compute elapsed processing time and compared-row throughput."""
+
+    file_processing_seconds = perf_counter() - processing_start
+    compared_rows_per_second = (
+        compared_rows / file_processing_seconds if file_processing_seconds > 0 else 0.0
+    )
+    return file_processing_seconds, compared_rows_per_second
+
+
+def _build_summary(
+    state: _BatchRuntimeState,
+    file_processing_seconds: float,
+    compared_rows_per_second: float,
+) -> BatchEvaluationSummary:
+    """Build immutable summary object from mutable runtime counters."""
+
+    accuracy = state.matched_rows / state.compared_rows if state.compared_rows > 0 else 0.0
+    return BatchEvaluationSummary(
+        total_feature_rows=state.total_feature_rows,
+        compared_rows=state.compared_rows,
+        missing_label_rows=state.missing_label_rows,
+        invalid_row_rows=state.invalid_row_rows,
+        matched_rows=state.matched_rows,
+        mismatched_rows=state.mismatched_rows,
+        predicted_approved_actual_approved=state.predicted_approved_actual_approved,
+        predicted_approved_actual_denied=state.predicted_approved_actual_denied,
+        predicted_denied_actual_approved=state.predicted_denied_actual_approved,
+        predicted_denied_actual_denied=state.predicted_denied_actual_denied,
+        accuracy=accuracy,
+        file_processing_seconds=file_processing_seconds,
+        compared_rows_per_second=compared_rows_per_second,
+    )
+
+
 def evaluate_batch_against_baseline(
     features_path: Path = DEFAULT_FEATURES_PATH,
     labels_path: Path = DEFAULT_LABELS_PATH,
@@ -196,21 +466,8 @@ def evaluate_batch_against_baseline(
     """
 
     labels_by_id = _load_labels(labels_path)
-
     engine = RuleEngine()
-
-    total_feature_rows = 0
-    compared_rows = 0
-    missing_label_rows = 0
-    invalid_row_rows = 0
-    matched_rows = 0
-    mismatched_rows = 0
-    predicted_approved_actual_approved = 0
-    predicted_approved_actual_denied = 0
-    predicted_denied_actual_approved = 0
-    predicted_denied_actual_denied = 0
-
-    output_rows: list[dict[str, object]] = []
+    state = _BatchRuntimeState()
     processing_start = perf_counter()
 
     effective_audit_mode = _resolve_audit_mode(audit_mode)
@@ -221,122 +478,38 @@ def evaluate_batch_against_baseline(
         persist_sql=persist_sql,
     )
 
-    sql_engine = None
-    loan_repository = None
-    audit_repository = None
+    sql_engine, loan_repository, audit_repository = _build_sql_repositories(
+        persist_sql=persist_sql,
+        sql_audit_database_url=sql_audit_database_url,
+    )
     batch_run_id = batch_audit_path.stem if batch_audit_path is not None else None
-
-    if persist_sql:
-        sql_engine = create_db_engine(database_url=sql_audit_database_url)
-        initialize_database(sql_engine)
-        loan_repository = LoanRepository(sql_engine)
-        audit_repository = AuditRepository(sql_engine)
 
     try:
         with features_path.open("r", newline="", encoding="utf-8") as features_file:
             reader = csv.DictReader(features_file)
             for row in reader:
-                total_feature_rows += 1
-                loan_id = row["loan_id"]
-                baseline_label = labels_by_id.get(loan_id)
-                if baseline_label is None:
-                    missing_label_rows += 1
-                    continue
-
-                try:
-                    app = _coerce_row_to_application(row)
-                    decision = engine.evaluate(app)
-                except (ValueError, KeyError):
-                    invalid_row_rows += 1
-                    continue
-
-                predicted_label = "Approved" if decision.approved else "Denied"
-
-                compared_rows += 1
-                is_match = predicted_label == baseline_label
-                if is_match:
-                    matched_rows += 1
-                else:
-                    mismatched_rows += 1
-
-                if predicted_label == "Approved" and baseline_label == "Approved":
-                    predicted_approved_actual_approved += 1
-                elif predicted_label == "Approved" and baseline_label == "Denied":
-                    predicted_approved_actual_denied += 1
-                elif predicted_label == "Denied" and baseline_label == "Approved":
-                    predicted_denied_actual_approved += 1
-                else:
-                    predicted_denied_actual_denied += 1
-
-                output_rows.append(
-                    {
-                        "loan_id": loan_id,
-                        "predicted_status": predicted_label,
-                        "baseline_status": baseline_label,
-                        "matched": is_match,
-                        "score": decision.score,
-                        "hard_rejection": decision.hard_rejection,
-                        "flagged_for_review": decision.flagged_for_review,
-                        "decision_summary": decision.summary(),
-                    }
+                _process_feature_row(
+                    row=row,
+                    labels_by_id=labels_by_id,
+                    engine=engine,
+                    state=state,
+                    persist_jsonl=persist_jsonl,
+                    batch_audit_path=batch_audit_path,
+                    storage_label=storage_label,
+                    loan_repository=loan_repository,
+                    audit_repository=audit_repository,
+                    features_path=features_path,
+                    batch_run_id=batch_run_id,
                 )
 
-                if persist_jsonl and batch_audit_path is not None:
-                    audit_record = build_decision_audit_record(
-                        app=app,
-                        decision=decision,
-                        audit_storage=storage_label,
-                    )
-                    audit_record["mode"] = "batch"
-                    audit_record["predicted_status"] = predicted_label
-                    audit_record["baseline_status"] = baseline_label
-                    audit_record["matched"] = is_match
-                    append_jsonl_record(audit_record, batch_audit_path)
+        _write_output_rows(
+            output_path=output_path,
+            output_rows=state.output_rows,
+        )
 
-                if loan_repository is not None and audit_repository is not None:
-                    persisted_loan = loan_repository.get_by_loan_id(app.loan_id)
-                    if persisted_loan is None:
-                        loan_application_id = loan_repository.insert_application(
-                            app=app,
-                            applicant_id=app.loan_id,
-                            source_file=str(features_path),
-                            loan_status=baseline_label,
-                        )
-                    else:
-                        loan_application_id = int(persisted_loan["id"])
-
-                    evaluation_id = audit_repository.insert_evaluation(
-                        loan_application_id=loan_application_id,
-                        decision=decision,
-                        mode="batch",
-                        batch_id=batch_run_id,
-                    )
-                    audit_repository.insert_rule_traces(
-                        evaluation_id=evaluation_id,
-                        rules=decision.rules_triggered,
-                    )
-
-        if output_path is not None:
-            output_path.parent.mkdir(parents=True, exist_ok=True)
-            with output_path.open("w", newline="", encoding="utf-8") as output_file:
-                fieldnames = [
-                    "loan_id",
-                    "predicted_status",
-                    "baseline_status",
-                    "matched",
-                    "score",
-                    "hard_rejection",
-                    "flagged_for_review",
-                    "decision_summary",
-                ]
-                writer = csv.DictWriter(output_file, fieldnames=fieldnames)
-                writer.writeheader()
-                writer.writerows(output_rows)
-
-        accuracy = matched_rows / compared_rows if compared_rows > 0 else 0.0
-        file_processing_seconds = perf_counter() - processing_start
-        compared_rows_per_second = (
-            compared_rows / file_processing_seconds if file_processing_seconds > 0 else 0.0
+        file_processing_seconds, compared_rows_per_second = _compute_performance_metrics(
+            compared_rows=state.compared_rows,
+            processing_start=processing_start,
         )
 
         if persist_jsonl and batch_audit_path is not None:
@@ -346,8 +519,8 @@ def evaluate_batch_against_baseline(
                     "audit_storage": storage_label,
                     "features_path": str(features_path),
                     "labels_path": str(labels_path),
-                    "compared_rows": compared_rows,
-                    "total_feature_rows": total_feature_rows,
+                    "compared_rows": state.compared_rows,
+                    "total_feature_rows": state.total_feature_rows,
                     "file_processing_seconds": file_processing_seconds,
                     "compared_rows_per_second": compared_rows_per_second,
                 },
@@ -357,23 +530,13 @@ def evaluate_batch_against_baseline(
         if audit_repository is not None:
             audit_repository.insert_data_load(
                 filepath=str(features_path),
-                processed_rows=compared_rows,
+                processed_rows=state.compared_rows,
                 file_processing_seconds=file_processing_seconds,
                 rows_per_second=compared_rows_per_second,
             )
 
-        return BatchEvaluationSummary(
-            total_feature_rows=total_feature_rows,
-            compared_rows=compared_rows,
-            missing_label_rows=missing_label_rows,
-            invalid_row_rows=invalid_row_rows,
-            matched_rows=matched_rows,
-            mismatched_rows=mismatched_rows,
-            predicted_approved_actual_approved=predicted_approved_actual_approved,
-            predicted_approved_actual_denied=predicted_approved_actual_denied,
-            predicted_denied_actual_approved=predicted_denied_actual_approved,
-            predicted_denied_actual_denied=predicted_denied_actual_denied,
-            accuracy=accuracy,
+        return _build_summary(
+            state=state,
             file_processing_seconds=file_processing_seconds,
             compared_rows_per_second=compared_rows_per_second,
         )
