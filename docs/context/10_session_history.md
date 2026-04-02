@@ -1,5 +1,13 @@
 # 10. Session History
 
+## 2026-04-02
+- Started Phase 4c implementation with API package scaffolding (`src/api/__init__.py`, `src/api/schemas/__init__.py`, `src/api/routers/__init__.py`) and dependency baseline update in `requirements.txt` (FastAPI stack, `pur`-driven refresh, and `bcrypt<5.0.0` compatibility pin for Passlib runtime stability).
+- Prepared release documentation for `v0.3.0` from `v0.2.0` (`d09ecbe`) through `main` baseline (`91f6e84`) and archived notes at `docs/releases/v0.3.0/RELEASE_NOTES.md`; root `CHANGELOG.md` was added with `0.3.0` entry and historical anchors for `0.2.0`/`0.1.0`.
+- Reconstructed traceable historical release artifacts for `v0.2.0` and `v0.1.0` using git tag boundaries on `main`, adding `docs/releases/v0.2.0/RELEASE_NOTES.md` and `docs/releases/v0.1.0/RELEASE_NOTES.md` and expanding root `CHANGELOG.md` entries for both versions.
+- Standardized public release format in Spanish under `.github/release-notes/es/` (`v0.1.0`, `v0.2.0`, `v0.3.0`) with a reusable template and verified `v0.1.0`/`v0.2.0` metadata against GitHub API; internal release context remained in English under `docs/releases/`.
+- Executed collision check between standardized public Spanish release files and published GitHub releases (`v0.1.0`, `v0.2.0`); internal metadata notes were clarified to distinguish API custom assets (`0`) vs UI auto-generated source archives (`2`).
+- Confirmed `v0.3.0` was published as a GitHub pre-release on `2026-04-02` and aligned local public note (`.github/release-notes/es/v0.3.0.md`) from pre-publication wording to post-publication compare links (`v0.2.0...v0.3.0`).
+- Verified published GitHub release metadata for `v0.2.0` and `v0.1.0` (titles, pre-release status, compare links, and assets count) and aligned both local release notes with the published format for precision.
 ## 2026-04-01
 - Session executed under context protocol with a pre-Phase-4b blocker pass committed first (`fix(preflight): resolve Phase 4b blockers before schema implementation`).
 - Runtime compatibility fix was applied for Python 3.13 by bumping SQLAlchemy to `2.0.39` after import assertion failure (`fix(preflight): bump SQLAlchemy pin for Python 3.13 compatibility`).
