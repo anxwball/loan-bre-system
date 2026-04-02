@@ -16,8 +16,9 @@ La base de datos proviene de Kaggle (**Loan Prediction Problem Dataset**), pero 
 | Motor de reglas deterministas | ✅ Primera version implementada |
 | Evaluacion por lotes BRE vs baseline | ✅ Operativo |
 | Auditoria JSONL + rendimiento de archivos | ✅ Operativo |
-| Persistencia SQLAlchemy Core (Phase 4b) | ✅ Esquema implementado |
+| Persistencia SQLAlchemy Core (Phase 4b) | ✅ Implementado y consolidado en `v0.3.0` |
 | Tests unitarios | ✅ Cobertura modular activa |
+| Release publico actual (`main`) | ✅ `v0.3.0` (Pre-release) |
 
 ---
 
@@ -61,7 +62,7 @@ loan-bre-system/
 
 ---
 
-## Fase actual: BRE v1 trazable + EDA base
+## Fase actual en `main`: cierre `v0.3.0` (Phase 4b)
 
 ### Fuente de datos
 
@@ -77,7 +78,9 @@ loan-bre-system/
 - Incluye: benchmark por lotes BRE vs labels historicas con CSV de comparacion y resumen agregado.
 - Incluye: auditoria persistente JSONL para decisiones y ejecuciones por lotes.
 - Incluye: logging de rendimiento de procesamiento de archivos (batch y pipeline).
-- Incluye: esquema relacional SQLAlchemy Core para iniciar migracion de auditoria a persistencia SQL.
+- Incluye: capa de persistencia SQLAlchemy Core (schema, engine y repositories) estabilizada en `main`.
+- Incluye: estandarizacion de release notes publicos (ES) y contexto interno (EN) alineada a `v0.3.0`.
+- Excluye: superficie API FastAPI de `v0.4.0`, que sigue en desarrollo fuera de este baseline.
 
 ### Pipeline de datos
 

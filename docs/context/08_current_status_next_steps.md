@@ -26,20 +26,16 @@ Phase 2 status snapshot:
 - Decision score is now clamped to a non-negative floor (`score >= 0`) after compensatory soft rules.
 - Current test run status: `pytest -q` -> 48 passed.
 - Sonar-focused quality fixes are applied: explicit `sonar.python.version=3.13` in `sonar-project.properties` and float-comparison hardening with `pytest.approx(...)` in tests.
-- Phase 2 implementation is complete on `main`; current execution focus is Phase 4b persistence enablement as a prerequisite for API exposure.
+- Phase 2 implementation is complete on `main`; Phase 4b persistence baseline was released as `v0.3.0` on `main` (`91f6e84` tag baseline).
+- Current `main` scope is stabilized around `v0.3.0`; Phase 4c API work is intentionally tracked outside this baseline until merge/release readiness.
 
 Pending (prioritized):
-1. Phase 4b persistence layer (active):
-	- SQLAlchemy Core schema in `src/db/schema.py` is implemented in the current session.
-	- DB connection module in `src/db/database.py` is implemented in the current session.
-	- Repositories under `src/db/repositories/` are implemented in the current session.
-	- Cutoff policy is now active: SQL is the default runtime persistence mode.
-	- `src/audit_logger.py` exposes policy-driven single-decision logging with SQL default and JSONL legacy compatibility wrapper.
-	- `src/batch_evaluator.py` supports explicit `audit_mode` (`sql`, `dual`, `jsonl`) and defaults to SQL policy.
-	- `src/data_loader.py` supports explicit `audit_mode` (`sql`, `dual`, `jsonl`) and defaults to SQL policy.
-	- Remaining step: remove legacy JSONL paths after stabilization window and backward-compatibility signoff.
-2. Phase 3 complementary ML with `scikit-learn`.
-3. Phase 4 REST API with FastAPI.
+1. Phase 4c REST API with FastAPI (active outside `main` baseline):
+	- Continue implementation on dedicated branch until release-ready integration.
+	- Keep `main` constrained to `v0.3.0` baseline until API quality gates are met.
+2. Phase 4b persistence stabilization follow-up:
+	- Remove legacy JSONL paths after stabilization window and backward-compatibility signoff.
+3. Phase 3 complementary ML with `scikit-learn`.
 4. Docker packaging for final README delivery.
 
 Open decisions:

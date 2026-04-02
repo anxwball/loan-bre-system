@@ -8,6 +8,7 @@
 - Executed collision check between standardized public Spanish release files and published GitHub releases (`v0.1.0`, `v0.2.0`); internal metadata notes were clarified to distinguish API custom assets (`0`) vs UI auto-generated source archives (`2`).
 - Confirmed `v0.3.0` was published as a GitHub pre-release on `2026-04-02` and aligned local public note (`.github/release-notes/es/v0.3.0.md`) from pre-publication wording to post-publication compare links (`v0.2.0...v0.3.0`).
 - Verified published GitHub release metadata for `v0.2.0` and `v0.1.0` (titles, pre-release status, compare links, and assets count) and aligned both local release notes with the published format for precision.
+- Updated `main` documentation baseline to explicitly align project status with released `v0.3.0` while keeping ongoing Phase 4c API work out of current `main` scope.
 ## 2026-04-01
 - Session executed under context protocol with a pre-Phase-4b blocker pass committed first (`fix(preflight): resolve Phase 4b blockers before schema implementation`).
 - Runtime compatibility fix was applied for Python 3.13 by bumping SQLAlchemy to `2.0.39` after import assertion failure (`fix(preflight): bump SQLAlchemy pin for Python 3.13 compatibility`).
