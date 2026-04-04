@@ -7,7 +7,7 @@ This repository uses a dual-track release documentation model:
   - Purpose: engineering traceability, requirements mapping, technical debt, and session continuity.
 - Public publication track (Spanish):
   - Path: `.github/release-notes/es/vX.Y.Z.md`
-  - Purpose: GitHub release body for public audience.
+  - Purpose: GitHub release body for publication.
 
 ## Standardization Rules
 

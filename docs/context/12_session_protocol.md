@@ -23,3 +23,5 @@ Operational constraints:
 - Never rewrite the full context for convenience.
 - Patch forward and preserve all still-valid decisions.
 - Record session closure updates in `docs/context/10_session_history.md`.
+- Register cross-module pending decisions in `docs/context/DECISIONS.md`.
+- Use `docs/prompts/v.1.1.0/session_changelog_template.md` as the default closeout format.

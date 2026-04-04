@@ -1,5 +1,15 @@
 # 08. Current Status and Next Steps
 
+Phase status quick reference:
+
+| Phase | Scope | Status | Latest note |
+|---|---|---|---|
+| Phase 1 | EDA and data baseline | Complete | Stable |
+| Phase 2 | BRE v1 + tests | Complete | Stable |
+| Phase 4b | SQL persistence migration | Complete | SQL default active |
+| Phase 4c | FastAPI exposure | In progress | Scaffolding started (2026-04-02) |
+| Phase 3 | Complementary ML (`scikit-learn`) | Pending | Not started |
+
 Working:
 - Complete project structure with professional packaging.
 - EDA pipeline refactored to explicit Pipeline Pattern orchestration:
@@ -39,5 +49,5 @@ Pending (prioritized):
 4. Docker packaging for final README delivery.
 
 Open decisions:
-- Define legacy JSONL removal milestone after stabilization and backward-compatibility signoff.
-- Decide whether ML replaces soft rules or is added as a new scored rule.
+- D01 (`docs/context/DECISIONS.md`): Define legacy JSONL removal milestone after stabilization and backward-compatibility signoff.
+- D02 (`docs/context/DECISIONS.md`): Decide whether ML replaces soft rules or is added as a new scored rule.

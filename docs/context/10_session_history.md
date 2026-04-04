@@ -1,5 +1,48 @@
 # 10. Session History
 
+## 2026-04-03
+
+Phase:
+- [ ] Phase 1
+- [ ] Phase 2
+- [ ] Phase 3
+- [ ] Phase 4b
+- [x] Phase 4c
+- [ ] Other:
+
+Objectives:
+- [x] Reduce session startup time via clearer root onboarding.
+- [x] Reduce context drift by aligning assistant load guidance.
+
+Deliverables:
+- [x] Root README refined to keep audience targeting tacit while preserving quick index and revised navigation.
+- [x] `CLAUDE.md`, `docs/context/agents/claude.md`, and `docs/context/agents/copilot.md` aligned to canonical load order.
+- [x] `docs/context/08_current_status_next_steps.md` updated with phase dashboard and decision-ID linkage.
+- [x] `docs/context/DECISIONS.md` and `docs/prompts/v.1.1.0/session_changelog_template.md` created and integrated.
+- [x] Internal audience explicitness centralized in `docs/context/README.md` for assistant-facing workflows.
+- [x] `docs/releases/README.md` wording normalized to keep publication track audience-neutral.
+- [x] Root README operational quickstart/navigation/workflow block migrated into `docs/context/README.md` to keep root docs human-entry oriented.
+
+Context deltas:
+- UPDATE: `README.md` -> audience targeting made tacit in root documentation.
+- UPDATE: `docs/context/README.md` -> explicit internal audience statement for AI assistants.
+- UPDATE: `README.md` -> removed assistant-facing quick index/map/workflow shortcuts from root entry.
+- UPDATE: `docs/context/README.md` -> added internal operational quickstart, navigation shortcuts, workflow, and command shortcuts.
+- UPDATE: `docs/context/08_current_status_next_steps.md` -> open decisions linked to D01 and D02.
+- UPDATE: `docs/context/10_session_history.md` -> template-style session closure format.
+
+Validation:
+- Commands run: none (documentation-only change set).
+- Result summary: cross-file links and session continuity content verified manually.
+
+Decisions:
+- Decision ID (if applicable): D01, D02 tracked in `docs/context/DECISIONS.md`.
+- Outcome: both remain pending with explicit registry ownership placeholder.
+
+Next session entry point:
+- First file to open: `docs/context/08_current_status_next_steps.md`.
+- First action to execute: continue Phase 4c API expansion and update decision ownership in `DECISIONS.md`.
+
 ## 2026-04-02
 - Started Phase 4c implementation with API package scaffolding (`src/api/__init__.py`, `src/api/schemas/__init__.py`, `src/api/routers/__init__.py`) and dependency baseline update in `requirements.txt` (FastAPI stack, `pur`-driven refresh, and `bcrypt<5.0.0` compatibility pin for Passlib runtime stability).
 - Prepared release documentation for `v0.3.0` from `v0.2.0` (`d09ecbe`) through `main` baseline (`91f6e84`) and archived notes at `docs/releases/v0.3.0/RELEASE_NOTES.md`; root `CHANGELOG.md` was added with `0.3.0` entry and historical anchors for `0.2.0`/`0.1.0`.

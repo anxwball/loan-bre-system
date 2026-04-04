@@ -5,19 +5,9 @@ The canonical project context is now modularized under `docs/context/`.
 
 Use this loading order:
 1. `docs/context/README.md`
-2. `docs/context/00_meta.md`
-3. `docs/context/01_developer_profile.md`
-4. `docs/context/02_project_identity.md`
-5. `docs/context/03_architecture_modules.md`
-6. `docs/context/04_bre_module.md`
-7. `docs/context/05_audit_module.md`
-8. `docs/context/06_code_conventions.md`
-9. `docs/context/07_ai_assistant_rules.md`
-10. `docs/context/08_current_status_next_steps.md`
-11. `docs/context/09_glossary.md`
-12. `docs/context/11_approval_criteria.md`
-13. `docs/context/12_session_protocol.md`
-14. `docs/context/10_session_history.md`
+2. Load modules in the canonical order defined by `docs/context/README.md`.
+3. Ensure `docs/context/12_session_protocol.md` is applied before phase-oriented work.
+4. Update `docs/context/10_session_history.md` at the end of each session.
 
 Language convention:
 - Internal context and instruction files are maintained in English.
@@ -27,7 +17,8 @@ Operational rule:
 - Update `docs/context/10_session_history.md` at the end of each work session.
 
 Execution status:
-- Phase 4b persistence layer is currently in progress.
+- Phase 4b persistence layer is implemented and stable under SQL-default runtime policy.
+- Phase 4c API exposure is currently in progress.
 - `src/audit_logger.py` remains active but is pending progressive deprecation as SQL persistence modules are completed.
 
 Documentation rule:
