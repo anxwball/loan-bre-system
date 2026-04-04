@@ -7,9 +7,9 @@ Use this template at session close before committing documentation updates.
 Phase:
 - [ ] Phase 1
 - [ ] Phase 2
-- [ ] Phase 3
-- [ ] Phase 4b
-- [ ] Phase 4c
+- [ ] Phase 3 (SQL persistence)
+- [ ] Phase 4 (API exposure)
+- [ ] Future ML track
 - [ ] Other:
 
 Objectives:

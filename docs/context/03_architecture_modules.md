@@ -18,7 +18,7 @@ loan-bre-system/
 |  |- audit_logger.py       # JSONL audit persistence helpers for decision and batch flows
 |  |- db/
 |  |  |- __init__.py        # Public exports for persistence-layer symbols
-|  |  |- schema.py          # SQLAlchemy Core schema for Phase 4b (implemented)
+|  |  |- schema.py          # SQLAlchemy Core schema for Phase 3 (implemented)
 |  |  |- database.py        # Engine and connection factory (implemented)
 |  |  |- repositories/      # Persistence repositories (implemented)
 |- tests/
@@ -59,7 +59,7 @@ Import rule:
 - Runtime code must not use `sys.path` mutation.
 - Test bootstrapping may use `tests/conftest.py` path injection when editable install is not guaranteed in local CI/dev shells.
 
-Phase 4b status:
+Phase 3 status:
 - `src/db/schema.py` is implemented.
 - `src/db/database.py` is implemented.
 - `src/db/repositories/` is implemented.

@@ -6,9 +6,14 @@ Phase status quick reference:
 |---|---|---|---|
 | Phase 1 | EDA and data baseline | Complete | Stable |
 | Phase 2 | BRE v1 + tests | Complete | Stable |
-| Phase 4b | SQL persistence migration | Complete | SQL default active |
-| Phase 4c | FastAPI exposure | In progress | Scaffolding started (2026-04-02) |
-| Phase 3 | Complementary ML (`scikit-learn`) | Pending | Not started |
+| Phase 3 | SQL persistence migration | Complete | SQL default active |
+| Phase 4 | FastAPI exposure | In progress | Scaffolding started (2026-04-02) |
+| Future | Complementary ML (`scikit-learn`) | Planned | Post-API roadmap |
+
+Phase naming alignment note:
+- Phase 3 (canonical roadmap on `main`) and historical Phase 4b labels point to the same persistence scope.
+- Mainline and release-facing docs use Phase 3 naming after scope reordering.
+- Branch-level implementation history may keep Phase 4b wording for the first persistence implementation that supported active API work.
 
 Working:
 - Complete project structure with professional packaging.
@@ -36,16 +41,17 @@ Phase 2 status snapshot:
 - Decision score is now clamped to a non-negative floor (`score >= 0`) after compensatory soft rules.
 - Current test run status: `pytest -q` -> 48 passed.
 - Sonar-focused quality fixes are applied: explicit `sonar.python.version=3.13` in `sonar-project.properties` and float-comparison hardening with `pytest.approx(...)` in tests.
-- Phase 2 implementation is complete on `main`; Phase 4b persistence baseline was released as `v0.3.0` on `main` (`91f6e84` tag baseline).
-- Current `main` scope is stabilized around `v0.3.0`; Phase 4c API work is intentionally tracked outside this baseline until merge/release readiness.
+- Phase 2 implementation is complete on `main`; Phase 3 persistence baseline was released as `v0.3.0` on `main` (`91f6e84` tag baseline).
+- Current `main` scope is stabilized around `v0.3.0`; Phase 4 API work is intentionally tracked outside this baseline until merge/release readiness.
 
 Pending (prioritized):
-1. Phase 4c REST API with FastAPI (active outside `main` baseline):
+1. Phase 4 REST API with FastAPI (active outside `main` baseline):
 	- Continue implementation on dedicated branch until release-ready integration.
 	- Keep `main` constrained to `v0.3.0` baseline until API quality gates are met.
-2. Phase 4b persistence stabilization follow-up:
+2. Phase 3 persistence stabilization follow-up:
 	- Remove legacy JSONL paths after stabilization window and backward-compatibility signoff.
-3. Phase 3 complementary ML with `scikit-learn`.
+	- Keep historical Phase 4b references only for branch chronology and old logs.
+3. Future ML implementation track with `scikit-learn`.
 4. Docker packaging for final README delivery.
 
 Open decisions:

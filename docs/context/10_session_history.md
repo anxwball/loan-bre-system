@@ -1,5 +1,13 @@
 # 10. Session History
 
+## 2026-04-04
+- Normalized active roadmap naming to remove Phase 4b/4c ambiguity in current context modules.
+- Phase mapping is now: Phase 3 = SQLAlchemy/SQLite persistence, Phase 4 = FastAPI API exposure, ML = future track.
+- Added explicit alignment note: Phase 3 (canonical `main` and `v0.3.0`) is equivalent to historical Phase 4b labels used in branch-level persistence implementation traces.
+- Implemented anti-collision workflow rules: canonical external/internal doc layering, branch-only API isolation (`src/api/`, `tests/test_api_*.py`), feature-branch start/close checklist, and pre-merge conflict-resolution checklist in `docs/context/12_session_protocol.md`, with discoverability notes in `docs/context/README.md` and `CLAUDE.md`.
+- Generalized anti-collision scope for future workstreams: branch-isolation rules now apply to any branch-specific implementation artifacts, with API paths kept as current examples.
+- Synchronized affected docs: `README.md`, `CLAUDE.md`, `docs/context/README.md`, `docs/context/02_project_identity.md`, `docs/context/03_architecture_modules.md`, `docs/context/08_current_status_next_steps.md`, `docs/context/DECISIONS.md`, and `docs/prompts/v.1.1.0/session_changelog_template.md`.
+
 ## 2026-04-03
 
 Phase:

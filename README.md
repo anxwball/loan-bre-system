@@ -16,7 +16,7 @@ La base de datos proviene de Kaggle (**Loan Prediction Problem Dataset**), pero 
 | Motor de reglas deterministas | ✅ Primera version implementada |
 | Evaluacion por lotes BRE vs baseline | ✅ Operativo |
 | Auditoria JSONL + rendimiento de archivos | ✅ Operativo |
-| Persistencia SQLAlchemy Core (Phase 4b) | ✅ Implementado y consolidado en `v0.3.0` |
+| Persistencia SQLAlchemy Core (Phase 3) | ✅ Implementado y consolidado en `v0.3.0` |
 | Tests unitarios | ✅ Cobertura modular activa |
 | Release publico actual (`main`) | ✅ `v0.3.0` (Pre-release) |
 
@@ -44,8 +44,8 @@ loan-bre-system/
 │   ├── audit_logger.py    # Persistencia JSONL para decisiones y lotes
 │   └── db/
 │       ├── __init__.py    # Exportes publicos de la capa de persistencia
-│       ├── schema.py      # Esquema SQLAlchemy Core (Phase 4b)
-│       ├── database.py    # Engine y bootstrap de persistencia (Phase 4b)
+│       ├── schema.py      # Esquema SQLAlchemy Core (Phase 3)
+│       ├── database.py    # Engine y bootstrap de persistencia (Phase 3)
 │       └── repositories/  # Repositorios SQL para solicitudes y auditoria
 ├── tests/
 │   ├── test_rule_engine_decisions.py
@@ -62,7 +62,7 @@ loan-bre-system/
 
 ---
 
-## Fase actual en `main`: cierre `v0.3.0` (Phase 4b)
+## Fase actual en `main`: cierre `v0.3.0` (Phase 3)
 
 ### Fuente de datos
 
@@ -166,7 +166,7 @@ Cada ejecucion corre el pipeline desde raw, persiste features limpios y luego ge
 
 - Ejecutar retiro controlado de wrappers JSONL legacy tras validar estabilidad de la ruta SQL por defecto.
 - Implementar capa API (FastAPI) para exponer evaluacion individual y batch.
-- Diseñar la fase ML complementaria sin romper la trazabilidad del BRE.
+- Diseñar una fase ML complementaria a futuro sin romper la trazabilidad del BRE.
 - Empaquetar despliegue con Docker y documentacion operativa final.
 
 ---

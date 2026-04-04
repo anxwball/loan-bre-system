@@ -19,7 +19,11 @@ Structure:
 - `agents/`: AI-specific adapters.
 
 Project structure note:
-- `src/db/`: Phase 4b persistence module for SQL schema, database connection setup, and repositories.
+- `src/db/`: Phase 3 persistence module for SQL schema, database connection setup, and repositories.
+
+Terminology note:
+- Canonical roadmap naming uses Phase 3 for SQL persistence.
+- Historical branch/session traces may still use Phase 4b for the same persistence implementation scope.
 
 Recommended load order:
 1. `00_meta.md`
@@ -45,6 +49,13 @@ Maintenance:
 - Apply `12_session_protocol.md` before phase-oriented work when context may have changed.
 - Register open cross-module decisions in `DECISIONS.md` and mirror final outcomes in the affected source modules.
 - Avoid duplicated content across modules.
+
+Branch anti-collision rules:
+- Keep `main` as canonical documentation baseline for roadmap semantics and public-facing state.
+- Keep branch-specific implementation files outside `main` until merge readiness.
+- Current example: API-layer artifacts stay branch-scoped (`src/api/`, `tests/test_api_*.py`) until integration.
+- Record branch-specific narrative in `10_session_history.md` instead of rewriting canonical roadmap docs.
+- Separate code and documentation commits before merge preparation.
 
 Operational quickstart (internal):
 
