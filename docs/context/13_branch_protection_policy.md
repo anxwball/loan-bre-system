@@ -15,6 +15,7 @@ Mandatory controls for `main`:
 
 Official required checks (effective from 2026-04-05):
 1. `ci-pytest`
+2. `ci-static-validation`
 
 Reference CI workflow:
 - `.github/workflows/main-guard-ci.yml`
