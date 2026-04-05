@@ -13,6 +13,6 @@ Technology stack:
 - Packaging: setuptools with `pip install -e .` (editable install)
 
 Status:
-- Current phase: Prototype. Phases 1, 2, and 3 completed on `main` baseline.
-- Execution focus: Phase 4 API exposure while preserving SQL-default persistence stability.
-- Strategic focus: Phase 4 (REST API) remains top portfolio priority; ML is planned as a future track.
+- Current phase: Mainline delivery. Phases 1, 2, 3, and initial Phase 4 API scope are integrated on `main`.
+- Execution focus: Phase 4 hardening and release-readiness validation while preserving SQL-default persistence stability.
+- Strategic focus: stabilize API quality gates for the next release; ML remains a future track.

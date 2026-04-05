@@ -31,7 +31,7 @@ Documentation layers (canonical):
 Branch isolation policy:
 - Keep branch-specific implementation artifacts outside `main` until merge readiness.
 - Do not introduce branch-only implementation files into `main` during documentation-only sessions.
-- Current example: API-layer artifacts remain branch-scoped (`src/api/`, `tests/test_api_*.py`) until release-ready integration.
+- Current reference: API-layer artifacts are already integrated on `main`; apply this isolation pattern to future feature-specific artifacts (for example, experimental ML modules).
 - Keep `main` documentation as canonical roadmap truth; represent branch differences as explicit deltas.
 
 Feature-branch start checklist:
@@ -50,7 +50,7 @@ Feature-branch close checklist:
 Pre-merge anti-collision checklist:
 1. Split code and documentation commits.
 2. Ensure phase naming aligns with canonical roadmap labels.
-3. Verify `main` does not carry branch-only implementation files.
+3. Verify only merge-approved implementation files are promoted to `main`.
 4. Resolve doc conflicts by preserving canonical `main` semantics and keeping branch details in session history.
 
 Operational constraints:

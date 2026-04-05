@@ -16,11 +16,11 @@ Language convention:
 Operational rule:
 - Update `docs/context/10_session_history.md` at the end of each work session.
 - Keep branch-only implementation artifacts outside `main` until merge readiness.
-- Current example: API artifacts (`src/api/`, `tests/test_api_*.py`) remain branch-scoped until integration.
+- API artifacts (`src/api/`, `tests/test_api_*.py`) are integrated on `main`; apply branch isolation to future feature-specific artifacts until merge readiness.
 
 Execution status:
 - Phase 3 persistence layer is implemented and stable under SQL-default runtime policy.
-- Phase 4 API exposure is currently in progress.
+- Phase 4 API exposure is integrated on `main`; current focus is hardening and release readiness.
 - `src/audit_logger.py` remains active but is pending progressive deprecation as SQL persistence modules are completed.
 
 Phase naming alignment:

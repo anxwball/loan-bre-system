@@ -20,6 +20,7 @@ Structure:
 
 Project structure note:
 - `src/db/`: Phase 3 persistence module for SQL schema, database connection setup, and repositories.
+- `src/api/`: Phase 4 FastAPI module integrated on `main` (auth, evaluate, audit, analyst routes).
 
 Terminology note:
 - Canonical roadmap naming uses Phase 3 for SQL persistence.
@@ -53,7 +54,7 @@ Maintenance:
 Branch anti-collision rules:
 - Keep `main` as canonical documentation baseline for roadmap semantics and public-facing state.
 - Keep branch-specific implementation files outside `main` until merge readiness.
-- Current example: API-layer artifacts stay branch-scoped (`src/api/`, `tests/test_api_*.py`) until integration.
+- Current reference: API-layer artifacts are already integrated on `main`; apply branch isolation to future feature-only modules until merge readiness.
 - Record branch-specific narrative in `10_session_history.md` instead of rewriting canonical roadmap docs.
 - Separate code and documentation commits before merge preparation.
 

@@ -4,6 +4,20 @@ All notable changes to this project are documented in this file.
 
 This repository follows Semantic Versioning (`MAJOR.MINOR.PATCH`).
 
+## [Unreleased]
+
+### Added
+- FastAPI API surface integrated on `main` with role-aware routes for auth, evaluation, audit, and analyst queue (`src/api/`).
+- API-focused automated tests added to mainline regression suite (`tests/test_api_auth.py`, `tests/test_api_evaluate.py`, `tests/test_api_audit.py`).
+
+### Changed
+- API router signatures aligned with FastAPI `Annotated` dependency style for role guard dependencies.
+- Redundant `response_model` declarations removed where return type annotations already define response contracts.
+
+### Quality
+- API test setup deduplicated through shared fixtures in `tests/conftest.py`.
+- Mainline validation snapshot updated: `pytest` -> 62 passed.
+
 ## [0.3.0] - 2026-04-02
 
 ### Release Cut

@@ -21,7 +21,7 @@ loan-bre-system/
 |  |  |- schema.py          # SQLAlchemy Core schema for Phase 3 (implemented)
 |  |  |- database.py        # Engine and connection factory (implemented)
 |  |  |- repositories/      # Persistence repositories (implemented)
-|  |- api/                  # Branch-scoped Phase 4 FastAPI layer (active feature work)
+|  |- api/                  # Phase 4 FastAPI layer integrated on main
 |  |  |- __init__.py
 |  |  |- main.py            # FastAPI app factory and router wiring
 |  |  |- dependencies.py    # DB/session dependencies and JWT role guards
@@ -36,9 +36,9 @@ loan-bre-system/
 |  |- test_batch_evaluator.py
 |  |- test_audit_logger.py
 |  |- test_data_loader.py
-|  |- test_api_auth.py      # Branch-scoped auth endpoint validation
-|  |- test_api_evaluate.py  # Branch-scoped single/batch endpoint validation
-|  |- test_api_audit.py     # Branch-scoped audit and analyst queue validation
+|  |- test_api_auth.py      # Auth endpoint validation
+|  |- test_api_evaluate.py  # Single/batch endpoint validation
+|  |- test_api_audit.py     # Audit and analyst queue validation
 |- pyproject.toml
 |- requirements.txt
 |- .gitignore
@@ -77,7 +77,9 @@ Phase 3 status:
 - `src/db/database.py` is implemented.
 - `src/db/repositories/` is implemented.
 
-Phase 4 branch snapshot (feature-scoped):
-- `src/api/main.py`, `src/api/dependencies.py`, `src/api/routers/`, and `src/api/schemas/` are implemented on the active feature branch.
+Phase 4 integration snapshot (mainline):
+- `src/api/main.py`, `src/api/dependencies.py`, `src/api/routers/`, and `src/api/schemas/` are integrated on `main`.
 - `tests/test_api_auth.py`, `tests/test_api_evaluate.py`, and `tests/test_api_audit.py` validate the current API scope.
-- Validation snapshot (2026-04-04): `pytest tests/test_api_auth.py tests/test_api_evaluate.py tests/test_api_audit.py -q` -> 7 passed.
+- Validation snapshots (2026-04-04):
+	- `pytest tests/test_api_auth.py tests/test_api_evaluate.py tests/test_api_audit.py -q` -> 7 passed.
+	- `pytest` -> 62 passed.

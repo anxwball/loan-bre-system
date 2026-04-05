@@ -17,8 +17,10 @@ La base de datos proviene de Kaggle (**Loan Prediction Problem Dataset**), pero 
 | Evaluacion por lotes BRE vs baseline | ✅ Operativo |
 | Auditoria JSONL + rendimiento de archivos | ✅ Operativo |
 | Persistencia SQLAlchemy Core (Phase 3) | ✅ Implementado y consolidado en `v0.3.0` |
+| Capa API FastAPI (Phase 4) | ✅ MVP integrada en `main` (camino a `v0.4.0`) |
 | Tests unitarios | ✅ Cobertura modular activa |
-| Release publico actual (`main`) | ✅ `v0.3.0` (Pre-release) |
+| Release publico mas reciente | ✅ `v0.3.0` (Pre-release) |
+| Estado actual de `main` | ✅ Integracion API + validacion `pytest` (62/62) |
 
 ---
 
@@ -42,6 +44,11 @@ loan-bre-system/
 │   ├── bre_engine.py      # Evaluacion de solicitud -> DecisionResult
 │   ├── batch_evaluator.py # Evaluacion por lotes BRE vs baseline historico
 │   ├── audit_logger.py    # Persistencia JSONL para decisiones y lotes
+│   ├── api/
+│   │   ├── main.py        # App FastAPI y ruteo principal
+│   │   ├── dependencies.py # Dependencias DB/JWT y guardas por rol
+│   │   ├── routers/       # Endpoints auth, evaluate, audit y analyst
+│   │   └── schemas/       # Contratos request/response de API
 │   └── db/
 │       ├── __init__.py    # Exportes publicos de la capa de persistencia
 │       ├── schema.py      # Esquema SQLAlchemy Core (Phase 3)
@@ -55,14 +62,17 @@ loan-bre-system/
 │   ├── test_batch_evaluator.py
 │   ├── test_audit_logger.py
 │   ├── test_data_loader.py
-│   └── test_db_repositories.py
+│   ├── test_db_repositories.py
+│   ├── test_api_auth.py
+│   ├── test_api_evaluate.py
+│   └── test_api_audit.py
 ├── pyproject.toml
 └── requirements.txt
 ```
 
 ---
 
-## Fase actual en `main`: cierre `v0.3.0` (Phase 3)
+## Fase actual en `main`: integracion de Phase 4 (camino a `v0.4.0`)
 
 ### Fuente de datos
 
@@ -79,8 +89,10 @@ loan-bre-system/
 - Incluye: auditoria persistente JSONL para decisiones y ejecuciones por lotes.
 - Incluye: logging de rendimiento de procesamiento de archivos (batch y pipeline).
 - Incluye: capa de persistencia SQLAlchemy Core (schema, engine y repositories) estabilizada en `main`.
+- Incluye: superficie API FastAPI en `src/api/` con endpoints de autenticacion, evaluacion individual/lote y auditoria por roles.
+- Incluye: pruebas API dedicadas (`tests/test_api_auth.py`, `tests/test_api_evaluate.py`, `tests/test_api_audit.py`).
 - Incluye: estandarizacion de release notes publicos (ES) y contexto interno (EN) alineada a `v0.3.0`.
-- Excluye: superficie API FastAPI de `v0.4.0`, que sigue en desarrollo fuera de este baseline.
+- Excluye: publicacion formal de `v0.4.0`; el trabajo actual se concentra en hardening y cierre de criterios de release.
 
 ### Pipeline de datos
 
@@ -139,6 +151,10 @@ Estructura de pruebas actual:
 - `tests/test_batch_evaluator.py`: metricas de lote, salida CSV, auditoria JSONL y rendimiento.
 - `tests/test_audit_logger.py`: persistencia JSONL y utilidades de path versionado.
 - `tests/test_data_loader.py`: logging de rendimiento de archivos en `run_pipeline`.
+- `tests/test_db_repositories.py`: validacion de persistencia SQL (repositorios).
+- `tests/test_api_auth.py`: autenticacion JWT por rol.
+- `tests/test_api_evaluate.py`: evaluacion individual y batch por perfil.
+- `tests/test_api_audit.py`: endpoints de auditoria y cola de analista.
 
 ## Ejecución del EDA
 
@@ -159,13 +175,16 @@ Cada ejecucion corre el pipeline desde raw, persiste features limpios y luego ge
 - seaborn
 - pathlib
 - SQLAlchemy
+- FastAPI
+- python-jose
+- passlib
 
 ---
 
 ## Proximos pasos
 
 - Ejecutar retiro controlado de wrappers JSONL legacy tras validar estabilidad de la ruta SQL por defecto.
-- Implementar capa API (FastAPI) para exponer evaluacion individual y batch.
+- Endurecer la capa API (auth, contratos y validaciones) y preparar release `v0.4.0`.
 - Diseñar una fase ML complementaria a futuro sin romper la trazabilidad del BRE.
 - Empaquetar despliegue con Docker y documentacion operativa final.
 

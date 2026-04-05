@@ -1,5 +1,11 @@
 # 10. Session History
 
+## 2026-04-04 (main)
+- Switched to `main` and fast-forward synced from `origin/main`, incorporating integrated API layer modules (`src/api/`) and API test modules (`tests/test_api_*.py`) into canonical baseline.
+- Executed full validation snapshot on `main`: `pytest` -> 62 passed.
+- Synchronized cross-layer documentation to reflect current reality: Phase 4 API is integrated on `main`; focus moved to hardening and release readiness.
+- Updated root and internal documentation modules: `README.md`, `CLAUDE.md`, `docs/context/README.md`, `docs/context/02_project_identity.md`, `docs/context/03_architecture_modules.md`, `docs/context/08_current_status_next_steps.md`, and `docs/context/12_session_protocol.md`.
+
 ## 2026-04-04 (feature: phase-4c-fastapi-layer)
 - Rebased feature branch on updated `main` documentation baseline to keep phase naming and anti-collision protocol aligned.
 - Implemented active Phase 4 API layer artifacts: `src/api/main.py`, `src/api/dependencies.py`, routers (`auth`, `evaluate`, `audit`) and request/response schemas.

@@ -7,7 +7,7 @@ Phase status quick reference:
 | Phase 1 | EDA and data baseline | Complete | Stable |
 | Phase 2 | BRE v1 + tests | Complete | Stable |
 | Phase 3 | SQL persistence migration | Complete | SQL default active |
-| Phase 4 | FastAPI exposure | In progress | Scaffolding started (2026-04-02) |
+| Phase 4 | FastAPI exposure | Integrated on main | Hardening + release readiness |
 | Future | Complementary ML (`scikit-learn`) | Planned | Post-API roadmap |
 
 Phase naming alignment note:
@@ -39,17 +39,16 @@ Phase 2 status snapshot:
 - Batch evaluator now emits a versioned batch audit artifact and includes file-processing performance metrics.
 - Data pipeline now exposes file-processing performance attributes and logs them to `data/audit/file_processing_latest.jsonl`.
 - Decision score is now clamped to a non-negative floor (`score >= 0`) after compensatory soft rules.
-- Current test run status: `pytest -q` -> 48 passed.
+- Current test run status: `pytest` -> 62 passed.
 - Sonar-focused quality fixes are applied: explicit `sonar.python.version=3.13` in `sonar-project.properties` and float-comparison hardening with `pytest.approx(...)` in tests.
 - Phase 2 implementation is complete on `main`; Phase 3 persistence baseline was released as `v0.3.0` on `main` (`91f6e84` tag baseline).
-- Current `main` scope is stabilized around `v0.3.0`; Phase 4 API work is intentionally tracked outside this baseline until merge/release readiness.
+- Current `main` scope includes integrated Phase 4 API modules (`src/api/`) and API tests while release documentation is still anchored to `v0.3.0`.
 
 Pending (prioritized):
-1. Phase 4 REST API with FastAPI (active outside `main` baseline):
-	- Continue implementation on dedicated branch until release-ready integration.
-	- Keep `main` constrained to `v0.3.0` baseline until API quality gates are met.
-	- Feature-branch implementation snapshot now includes app/dependencies/routers/schemas plus API test modules.
-	- Validation snapshot (2026-04-04): `pytest tests/test_api_auth.py tests/test_api_evaluate.py tests/test_api_audit.py -q` -> 7 passed.
+1. Phase 4 REST API hardening and release preparation:
+	- Keep improving auth guards, response contracts, and role access boundaries.
+	- Prepare `v0.4.0` release cut notes once API quality gates are fully signed off.
+	- Maintain API regression checks (`tests/test_api_auth.py`, `tests/test_api_evaluate.py`, `tests/test_api_audit.py`) on each integration cycle.
 2. Phase 3 persistence stabilization follow-up:
 	- Remove legacy JSONL paths after stabilization window and backward-compatibility signoff.
 	- Keep historical Phase 4b references only for branch chronology and old logs.
