@@ -16,6 +16,7 @@ Mandatory controls for `main`:
 Official required checks (effective from 2026-04-05):
 1. `ci-pytest`
 2. `ci-static-validation`
+3. `SonarCloud Code Analysis`
 
 Reference CI workflow:
 - `.github/workflows/main-guard-ci.yml`
@@ -34,3 +35,11 @@ Exit criteria:
 
 Operational note:
 - Emergency changes must use PR flow; temporary bypass enablement is out of policy and requires an explicit incident decision logged in `docs/context/DECISIONS.md`.
+
+Recommended quality gate exit policy for new code:
+1. Zero blocker issues.
+2. Zero critical issues.
+3. No degradation in maintainability rating.
+4. No degradation in security rating.
+5. New-code quality gate target: 100% pass (all gate conditions satisfied).
+6. Pull request decoration must remain enabled so Sonar results are visible in PR checks and summaries.
