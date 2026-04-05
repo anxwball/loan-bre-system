@@ -19,6 +19,11 @@
 - Executed real PR validation on `#12` (`feat/ci-integral-review-20260405`):
 	- Commit scenario GREEN: both required checks passed.
 	- Commit scenario RED: intentional failing test commit made `ci-pytest` fail and PR merge was blocked by base branch policy.
+- Added Sonar as blocking governance control on `main` by extending required checks to include `SonarCloud Code Analysis` alongside `ci-pytest` and `ci-static-validation`.
+- Confirmed Sonar presence and PR decoration path on active PR checks (`#12`) and on `main` branch head check-runs.
+- Executed Sonar integrity red test with temporary PR `#13` (`probe/sonar-severe-gate-20260405`) containing intentionally insecure code; Sonar check failed while CI checks passed, and merge was blocked by base branch policy.
+- Closed temporary PR `#13` after evidence capture and removed temporary remote probe branches.
+- Updated branch protection policy module with recommended new-code quality gate exit criteria (zero blocker/critical, no maintainability/security degradation, 100% gate pass target, PR decoration visibility).
 
 ## 2026-04-04 (main)
 - Switched to `main` and fast-forward synced from `origin/main`, incorporating integrated API layer modules (`src/api/`) and API test modules (`tests/test_api_*.py`) into canonical baseline.
