@@ -88,7 +88,6 @@ def _decision_to_response(decision: DecisionResult) -> DecisionResponse:
 
 @router.post(
     "",
-    response_model=EvaluationResponse,
     status_code=status.HTTP_200_OK,
 )
 def evaluate_single_application(
@@ -118,7 +117,6 @@ def evaluate_single_application(
 
 @router.post(
     "/batch",
-    response_model=BatchEvaluationResponse,
     status_code=status.HTTP_200_OK,
 )
 def evaluate_batch_applications(

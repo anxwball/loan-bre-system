@@ -17,7 +17,6 @@ router = APIRouter(tags=["auth"])
 
 @router.post(
     "/token",
-    response_model=TokenResponse,
     status_code=status.HTTP_200_OK,
 )
 def issue_access_token(payload: TokenRequest) -> TokenResponse:

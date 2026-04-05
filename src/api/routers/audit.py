@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import Connection, func, select
@@ -74,14 +75,13 @@ def _trace_from_row(row: dict) -> RuleTraceResponse:
 
 @audit_router.get(
     "/evaluations",
-    response_model=AuditEvaluationPage,
     status_code=status.HTTP_200_OK,
 )
 def list_audit_evaluations(
-    page: int = Query(default=1, ge=1),
-    page_size: int = Query(default=20, ge=1, le=200),
-    _admin: dict[str, str] = Depends(require_admin),
-    db: Connection = Depends(get_db),
+    _admin: Annotated[dict[str, str], Depends(require_admin)],
+    db: Annotated[Connection, Depends(get_db)],
+    page: Annotated[int, Query(ge=1)] = 1,
+    page_size: Annotated[int, Query(ge=1, le=200)] = 20,
 ) -> AuditEvaluationPage:
     """Return paginated persisted evaluations for admin users."""
 
@@ -134,13 +134,12 @@ def list_audit_evaluations(
 
 @audit_router.get(
     "/evaluations/{evaluation_id}/traces",
-    response_model=list[RuleTraceResponse],
     status_code=status.HTTP_200_OK,
 )
 def get_evaluation_traces(
     evaluation_id: int,
-    _admin: dict[str, str] = Depends(require_admin),
-    db: Connection = Depends(get_db),
+    _admin: Annotated[dict[str, str], Depends(require_admin)],
+    db: Annotated[Connection, Depends(get_db)],
 ) -> list[RuleTraceResponse]:
     """Return detailed rule traces for one persisted evaluation."""
 
@@ -162,14 +161,13 @@ def get_evaluation_traces(
 
 @analyst_router.get(
     "/queue",
-    response_model=AnalystQueueResponse,
     status_code=status.HTTP_200_OK,
 )
 def list_analyst_queue(
-    page: int = Query(default=1, ge=1),
-    page_size: int = Query(default=20, ge=1, le=200),
-    _analyst: dict[str, str] = Depends(require_analyst),
-    db: Connection = Depends(get_db),
+    _analyst: Annotated[dict[str, str], Depends(require_analyst)],
+    db: Annotated[Connection, Depends(get_db)],
+    page: Annotated[int, Query(ge=1)] = 1,
+    page_size: Annotated[int, Query(ge=1, le=200)] = 20,
 ) -> AnalystQueueResponse:
     """Return paginated flagged evaluations for analyst queue consumption."""
 
