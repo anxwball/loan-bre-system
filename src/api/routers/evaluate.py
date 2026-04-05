@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 from statistics import mean
+from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status
 
@@ -92,7 +93,7 @@ def _decision_to_response(decision: DecisionResult) -> DecisionResponse:
 )
 def evaluate_single_application(
     payload: LoanEvaluationRequest,
-    _user: dict[str, str] = Depends(get_current_user),
+    _user: Annotated[dict[str, str], Depends(get_current_user)],
 ) -> EvaluationResponse:
     """Evaluate one loan application and persist SQL audit artifacts."""
 
@@ -121,7 +122,7 @@ def evaluate_single_application(
 )
 def evaluate_batch_applications(
     payload: BatchEvaluationRequest,
-    _admin: dict[str, str] = Depends(require_admin),
+    _admin: Annotated[dict[str, str], Depends(require_admin)],
 ) -> BatchEvaluationResponse:
     """Evaluate a bounded batch of applications with admin-only access."""
 
