@@ -13,6 +13,12 @@
 - Updated active GitHub ruleset to require only `ci-pytest` under strict up-to-date policy.
 - Executed full local validation for the unified check command: `pytest -q` -> 62 passed.
 - Re-ran direct-push rejection probe after refactor; remote rejection explicitly required `ci-pytest` and PR flow (`GH013`).
+- Implemented integral PR CI workflow update in `.github/workflows/main-guard-ci.yml` with two jobs: `ci-pytest` (`pytest -q`) and `ci-static-validation` (`compileall` + `pip check`).
+- Added `requirements-ci.txt` as Linux-compatible CI dependency baseline to avoid resolver/platform conflicts from the full workstation-oriented `requirements.txt`.
+- Updated active branch protection ruleset to require both checks (`ci-pytest`, `ci-static-validation`) under strict up-to-date policy.
+- Executed real PR validation on `#12` (`feat/ci-integral-review-20260405`):
+	- Commit scenario GREEN: both required checks passed.
+	- Commit scenario RED: intentional failing test commit made `ci-pytest` fail and PR merge was blocked by base branch policy.
 
 ## 2026-04-04 (main)
 - Switched to `main` and fast-forward synced from `origin/main`, incorporating integrated API layer modules (`src/api/`) and API test modules (`tests/test_api_*.py`) into canonical baseline.
