@@ -1,5 +1,12 @@
 # 10. Session History
 
+## 2026-04-04 (feature: phase-4c-fastapi-layer)
+- Rebased feature branch on updated `main` documentation baseline to keep phase naming and anti-collision protocol aligned.
+- Implemented active Phase 4 API layer artifacts: `src/api/main.py`, `src/api/dependencies.py`, routers (`auth`, `evaluate`, `audit`) and request/response schemas.
+- Added branch-scoped API validation modules: `tests/test_api_auth.py`, `tests/test_api_evaluate.py`, and `tests/test_api_audit.py`.
+- Executed API validation snapshot for this session: `pytest tests/test_api_auth.py tests/test_api_evaluate.py tests/test_api_audit.py -q` -> 7 passed.
+- Updated context architecture/status docs to reflect feature-scoped API progress and validation evidence while preserving `main` as canonical release baseline.
+
 ## 2026-04-04
 - Normalized active roadmap naming to remove Phase 4b/4c ambiguity in current context modules.
 - Phase mapping is now: Phase 3 = SQLAlchemy/SQLite persistence, Phase 4 = FastAPI API exposure, ML = future track.
