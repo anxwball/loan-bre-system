@@ -1,5 +1,19 @@
 # 10. Session History
 
+## 2026-04-05 (main)
+- Activated and hardened `main` branch protection through repository ruleset `default-branch-protection` with: PR-required flow, minimum 1 approval, stale-review dismissal on push, last-push approval required, review-thread resolution required, linear history, force-push blocking, and strict required status checks.
+- Disabled all bypass actors on the active ruleset (`current_user_can_bypass: never`) to enforce non-bypass default operation, including admins.
+- Defined official required checks effective immediately: `ci-core-tests` and `ci-api-tests`.
+- Added CI workflow baseline at `.github/workflows/main-guard-ci.yml` so required checks are explicitly produced for PR and push to `main`.
+- Added internal policy module `docs/context/13_branch_protection_policy.md` with rollout controls, verification protocol, and exit criteria.
+- Real verification executed against remote: direct push attempt to `main` from temporary probe branch was rejected with `GH013` and explicit rule failures (`Changes must be made through a pull request`, `2 of 2 required status checks are expected`).
+- Local probe branch used for verification was deleted after the test; `main` remained unchanged on remote.
+- Refactored required status checks from two contexts to one unified context: `ci-pytest`.
+- Updated `.github/workflows/main-guard-ci.yml` to a single CI job (`ci-pytest`) that runs `pytest -q`.
+- Updated active GitHub ruleset to require only `ci-pytest` under strict up-to-date policy.
+- Executed full local validation for the unified check command: `pytest -q` -> 62 passed.
+- Re-ran direct-push rejection probe after refactor; remote rejection explicitly required `ci-pytest` and PR flow (`GH013`).
+
 ## 2026-04-04 (main)
 - Switched to `main` and fast-forward synced from `origin/main`, incorporating integrated API layer modules (`src/api/`) and API test modules (`tests/test_api_*.py`) into canonical baseline.
 - Executed full validation snapshot on `main`: `pytest` -> 62 passed.

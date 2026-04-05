@@ -14,6 +14,7 @@ Structure:
 - `00_meta.md`: scope, ownership, and update rules.
 - `01_developer_profile.md` to `11_approval_criteria.md`: modular context sections.
 - `12_session_protocol.md`: mandatory pre-phase context-update protocol.
+- `13_branch_protection_policy.md`: main-branch protection policy, rollout checks, and exit criteria.
 - `10_session_history.md`: working log and session continuity.
 - `DECISIONS.md`: centralized registry for cross-module open decisions.
 - `agents/`: AI-specific adapters.
@@ -39,7 +40,8 @@ Recommended load order:
 10. `09_glossary.md`
 11. `11_approval_criteria.md`
 12. `12_session_protocol.md`
-13. `10_session_history.md`
+13. `13_branch_protection_policy.md`
+14. `10_session_history.md`
 
 Language convention:
 - All internal context and instruction files are written in English for standardization and better token processing.
@@ -76,6 +78,7 @@ Internal navigation shortcuts:
 | Review pending cross-module decisions | `DECISIONS.md` |
 | Review architecture and module boundaries | `03_architecture_modules.md` |
 | Review approval criteria and rule traceability | `11_approval_criteria.md` |
+| Review main branch protection policy and rollout checks | `13_branch_protection_policy.md` |
 | Review internal coding/documentation conventions | `06_code_conventions.md` |
 
 Daily assistant workflow:
