@@ -48,8 +48,6 @@ Pending (prioritized):
 1. Phase 4 REST API with FastAPI (active outside `main` baseline):
 	- Continue implementation on dedicated branch until release-ready integration.
 	- Keep `main` constrained to `v0.3.0` baseline until API quality gates are met.
-	- Feature-branch implementation snapshot now includes app/dependencies/routers/schemas plus API test modules.
-	- Validation snapshot (2026-04-04): `pytest tests/test_api_auth.py tests/test_api_evaluate.py tests/test_api_audit.py -q` -> 7 passed.
 2. Phase 3 persistence stabilization follow-up:
 	- Remove legacy JSONL paths after stabilization window and backward-compatibility signoff.
 	- Keep historical Phase 4b references only for branch chronology and old logs.
