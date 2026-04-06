@@ -12,6 +12,7 @@ Mandatory controls for `main`:
 5. Bypass is disabled for all actors, including admins (default mode).
 6. All review conversations must be resolved before merge.
 7. Branch must be up to date before merge (strict required checks policy).
+8. Copilot reviews are advisory only and do not satisfy the approval requirement.
 
 Official required checks (effective from 2026-04-05):
 1. `ci-pytest`
@@ -41,6 +42,7 @@ Exit criteria:
 
 Operational note:
 - Emergency changes must use PR flow; temporary bypass enablement is out of policy and requires an explicit incident decision logged in `docs/context/DECISIONS.md`.
+- If Copilot is used for review, a human approval is still required before merge.
 
 Recommended quality gate exit policy for new code:
 1. Zero blocker issues.
