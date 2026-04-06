@@ -6,13 +6,13 @@ Scope:
 
 Mandatory controls for `main`:
 1. Pull request is required for all merges and branch updates.
-2. At least 1 approval is required before merge.
+2. No approval is required before merge (solo developer mode; Copilot reviews are advisory only).
 3. Direct push to `main` is blocked.
 4. Force push is blocked.
 5. Bypass is disabled for all actors, including admins (default mode).
 6. All review conversations must be resolved before merge.
 7. Branch must be up to date before merge (strict required checks policy).
-8. Copilot reviews are advisory only and do not satisfy the approval requirement.
+8. Copilot reviews are advisory only.
 
 Official required checks (effective from 2026-04-05):
 1. `ci-pytest`
@@ -31,18 +31,17 @@ Required-check source mapping:
 Verification protocol (real evidence):
 1. Confirm active ruleset and protection state with GitHub API (`gh api`).
 2. Attempt a direct push to `main` from a non-main branch ref and confirm rejection.
-3. Confirm pull request cannot be merged without at least one approval.
-4. Confirm pull request cannot be merged with unresolved conversations.
-5. Confirm outdated branch is blocked until synchronization and required checks pass.
+3. Confirm pull request cannot be merged with unresolved conversations.
+4. Confirm outdated branch is blocked until synchronization and required checks pass.
 
 Exit criteria:
 1. No actor can push directly to `main`.
-2. Every merge to `main` requires PR flow and human review.
+2. Every merge to `main` requires PR flow (approval not required).
 3. Protection rule is active on GitHub and validated through a real push-rejection test.
 
 Operational note:
 - Emergency changes must use PR flow; temporary bypass enablement is out of policy and requires an explicit incident decision logged in `docs/context/DECISIONS.md`.
-- If Copilot is used for review, a human approval is still required before merge.
+- If Copilot is used for review, no human approval is required (solo developer mode).
 
 Recommended quality gate exit policy for new code:
 1. Zero blocker issues.

@@ -31,7 +31,14 @@
 - Confirmed Sonar presence and PR decoration path on active PR checks (`#12`) and on `main` branch head check-runs.
 - Executed Sonar integrity red test with temporary PR `#13` (`probe/sonar-severe-gate-20260405`) containing intentionally insecure code; Sonar check failed while CI checks passed, and merge was blocked by base branch policy.
 - Closed temporary PR `#13` after evidence capture and removed temporary remote probe branches.
-- Updated branch protection policy module with recommended new-code quality gate exit criteria (zero blocker/critical, no maintainability/security degradation, 100% gate pass target, PR decoration visibility).
+
+## 2026-04-06 (feature: feat/ci-integral-review-20260405, solo-dev policy update)
+- Lowered branch protection approval requirement to 0 (solo developer mode): merges to `main` now require PR flow but no approval.
+- Updated `docs/context/13_branch_protection_policy.md` to reflect no approval required; Copilot reviews remain advisory.
+- Documented new verification protocol and exit criteria for solo-dev mode.
+- Policy now matches solo developer workflow; human approval is not required for merges.
+
+
 
 ## 2026-04-04 (main)
 - Switched to `main` and fast-forward synced from `origin/main`, incorporating integrated API layer modules (`src/api/`) and API test modules (`tests/test_api_*.py`) into canonical baseline.
