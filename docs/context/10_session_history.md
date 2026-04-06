@@ -3,7 +3,7 @@
 ## 2026-04-05 (main)
 - Activated and hardened `main` branch protection through repository ruleset `default-branch-protection` with: PR-required flow, minimum 1 approval, stale-review dismissal on push, last-push approval required, review-thread resolution required, linear history, force-push blocking, and strict required status checks.
 - Disabled all bypass actors on the active ruleset (`current_user_can_bypass: never`) to enforce non-bypass default operation, including admins.
-- Defined official required checks effective immediately: `ci-core-tests` and `ci-api-tests`.
+- Defined official required checks effective immediately: `ci-pytest` and `ci-static-validation`.
 - Added CI workflow baseline at `.github/workflows/main-guard-ci.yml` so required checks are explicitly produced for PR and push to `main`.
 - Added internal policy module `docs/context/13_branch_protection_policy.md` with rollout controls, verification protocol, and exit criteria.
 - Real verification executed against remote: direct push attempt to `main` from temporary probe branch was rejected with `GH013` and explicit rule failures (`Changes must be made through a pull request`, `2 of 2 required status checks are expected`).
@@ -17,8 +17,8 @@
 - Added `requirements-ci.txt` as Linux-compatible CI dependency baseline to avoid resolver/platform conflicts from the full workstation-oriented `requirements.txt`.
 - Updated active branch protection ruleset to require both checks (`ci-pytest`, `ci-static-validation`) under strict up-to-date policy.
 - Executed real PR validation on `#12` (`feat/ci-integral-review-20260405`):
-	- Commit scenario GREEN: both required checks passed.
-	- Commit scenario RED: intentional failing test commit made `ci-pytest` fail and PR merge was blocked by base branch policy.
+  - Commit scenario GREEN: both required checks passed.
+  - Commit scenario RED: intentional failing test commit made `ci-pytest` fail and PR merge was blocked by base branch policy.
 - Added Sonar as blocking governance control on `main` by extending required checks to include `SonarCloud Code Analysis` alongside `ci-pytest` and `ci-static-validation`.
 - Confirmed Sonar presence and PR decoration path on active PR checks (`#12`) and on `main` branch head check-runs.
 - Executed Sonar integrity red test with temporary PR `#13` (`probe/sonar-severe-gate-20260405`) containing intentionally insecure code; Sonar check failed while CI checks passed, and merge was blocked by base branch policy.
