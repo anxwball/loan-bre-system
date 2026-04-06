@@ -1,6 +1,7 @@
 # Top-level CI dependencies source file.
 # Regenerate lock after edits with:
-# python -m piptools compile --resolver=backtracking --output-file requirements-ci.lock.txt requirements-ci.txt
+# Use a Python 3.13 environment.
+# python -m piptools compile --resolver=backtracking --generate-hashes --output-file requirements-ci.lock.txt requirements-ci.txt
 pytest==9.0.2
 numpy==2.4.4
 pandas==3.0.2

@@ -1,5 +1,12 @@
 # 10. Session History
 
+## 2026-04-06 (feature: feat/ci-integral-review-20260405)
+- Consolidated branch-governance CI runtime to Python `3.13` only in `.github/workflows/main-guard-ci.yml` while preserving official required check names: `ci-pytest` and `ci-static-validation`.
+- Removed matrix/aggregator complexity from `ci-pytest` and standardized both required jobs to use `actions/setup-python` with `python-version: "3.13"`.
+- Preserved deterministic installation hardening in both jobs: pinned installer bootstrap (`pip==26.0.1`), hash-enforced dependency installation (`--require-hashes`), and lock-file source `requirements-ci.lock.txt`.
+- Updated `requirements-ci.txt` guidance to explicitly state lock regeneration must be performed in a Python `3.13` environment.
+- Local validation executed on Python `3.13`: `pytest -q` -> 62 passed.
+
 ## 2026-04-05 (main)
 - Activated and hardened `main` branch protection through repository ruleset `default-branch-protection` with: PR-required flow, minimum 1 approval, stale-review dismissal on push, last-push approval required, review-thread resolution required, linear history, force-push blocking, and strict required status checks.
 - Disabled all bypass actors on the active ruleset (`current_user_can_bypass: never`) to enforce non-bypass default operation, including admins.
