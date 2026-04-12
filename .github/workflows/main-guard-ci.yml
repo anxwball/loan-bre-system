@@ -10,6 +10,8 @@ jobs:
   tests:
     name: ci-pytest
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout repository
@@ -34,6 +36,8 @@ jobs:
   static-validation:
     name: ci-static-validation
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout repository
