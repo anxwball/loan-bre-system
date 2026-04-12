@@ -1,6 +1,6 @@
 # Top-level CI dependencies source file.
 # Regenerate lock after edits with:
-# Use a Python 3.13 environment.
+# Use a Python 3.13 environment (preferred) or 3.11+ for pure-Python packages.
 # python -m piptools compile --resolver=backtracking --generate-hashes --output-file requirements-ci.lock.txt requirements-ci.txt
 pytest==9.0.2
 numpy==2.4.4
