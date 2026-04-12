@@ -6,7 +6,7 @@
 - Preserved deterministic installation hardening in both jobs: pinned installer bootstrap (`pip==26.0.1`), hash-enforced dependency installation (`--require-hashes`), and lock-file source `requirements-ci.lock.txt`.
 - Updated `requirements-ci.txt` guidance to explicitly state lock regeneration must be performed in a Python `3.13` environment.
 - Local validation executed on Python `3.13`: `pytest -q` -> 62 passed.
-- Confirmed GitHub Copilot reviews on PR `#12` are recorded as `COMMENTED`, not `APPROVED`; human approval remains required by branch protection.
+- Confirmed GitHub Copilot reviews on PR `#12` are recorded as `COMMENTED`, not `APPROVED`; under the current solo-dev branch-protection policy, human approval is not required.
 
 ## 2026-04-05 (main)
 - Activated and hardened `main` branch protection through repository ruleset `default-branch-protection` with: PR-required flow, minimum 1 approval, stale-review dismissal on push, last-push approval required, review-thread resolution required, linear history, force-push blocking, and strict required status checks.
