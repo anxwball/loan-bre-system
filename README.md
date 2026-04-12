@@ -6,6 +6,15 @@ La base de datos proviene de Kaggle (**Loan Prediction Problem Dataset**), pero 
 
 ---
 
+## ⚠️ Proyecto congelado
+
+> **Este proyecto está actualmente congelado por cuestiones de tiempo y disponibilidad.**
+>
+> No se planean nuevas funcionalidades, releases ni correcciones en el corto plazo.
+> El código existente permanece disponible como referencia, pero no se garantiza mantenimiento activo.
+
+---
+
 ## Estado del proyecto
 
 | Fase | Estado |
@@ -21,6 +30,7 @@ La base de datos proviene de Kaggle (**Loan Prediction Problem Dataset**), pero 
 | Tests unitarios | ✅ Cobertura modular activa |
 | Release publico mas reciente | ✅ `v0.3.0` (Pre-release) |
 | Estado actual de `main` | ✅ Integracion API + validacion `pytest` (62/62) |
+| **Mantenimiento activo** | 🔴 **Congelado** |
 
 ---
 
