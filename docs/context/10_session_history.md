@@ -1,5 +1,15 @@
 # 10. Session History
 
+## 2026-04-12 (copilot/docs-update-pr-16)
+- Cloned all changes from closed PR #16 (`copilot/clone-15-branch-ruleset`) into branch `copilot/docs-update-pr-16` via cherry-pick by file.
+- Recovered missing CI artifacts: `.github/workflows/main-guard-ci.yml`, `requirements-ci.txt`, `requirements-ci.lock.txt`.
+- CI workflow uses explicit `permissions: contents: read` on both `ci-pytest` and `ci-static-validation` jobs; runtime locked to Python 3.13.
+- Fixed unpatched ecdsa Minerva timing-attack vulnerability: replaced `python-jose[cryptography]==3.5.0` with `PyJWT==2.12.0` in `requirements.txt`.
+- Migrated `src/api/dependencies.py` from python-jose API (`from jose import JWTError, jwt`) to PyJWT API (`import jwt as pyjwt`, `from jwt import PyJWTError`).
+- Added `docs/context/13_branch_protection_policy.md` documenting branch protection controls, required status checks, and quality gate exit policy.
+- Validation: `pytest -q` → 62 passed; `python -m compileall -q src tests` → clean; `pip check` → no broken requirements.
+- Context delta: ADD `docs/context/13_branch_protection_policy.md`; UPDATE `requirements.txt`; UPDATE `src/api/dependencies.py`; ADD `.github/workflows/main-guard-ci.yml`; ADD `requirements-ci.txt`; ADD `requirements-ci.lock.txt`.
+
 ## 2026-04-04 (main)
 - Switched to `main` and fast-forward synced from `origin/main`, incorporating integrated API layer modules (`src/api/`) and API test modules (`tests/test_api_*.py`) into canonical baseline.
 - Executed full validation snapshot on `main`: `pytest` -> 62 passed.
