@@ -1,5 +1,11 @@
 # 10. Session History
 
+## 2026-04-12 (copilot/review-ci-cd-inconsistencies)
+- Reviewed CI/CD inconsistencies: primary finding was that `.github/workflows/main-guard-ci.yml`, `requirements-ci.txt`, `requirements-ci.lock.txt`, and `docs/context/13_branch_protection_policy.md` were created in `feat/ci-integral-review-20260405` (PR #12, closed without merge) and were never present on `main`.
+- `docs/context/README.md` already referenced `13_branch_protection_policy.md` in load order on `main`, but the file itself was absent — resolved.
+- Recovered all missing CI artifacts from the closed branch and integrated them into this PR.
+- Identified and deleted 9 stale remote branches: 7 with fully merged PRs (`chore/revert-issue1-direct-main`, `feat/issue-2-traceable-bre-v1`, `feat/issue-3-test-suite`, `feat/issue1-proper-pr`, `feat/phase-4b-db-schema`, `feat/phase-4c-fastapi-layer`, `revert-9-feat/phase-4c-fastapi-layer`) and 2 with closed/abandoned PRs (`copilot/update-readme-project-status`, `feat/ci-integral-review-20260405`).
+
 ## 2026-04-04 (main)
 - Switched to `main` and fast-forward synced from `origin/main`, incorporating integrated API layer modules (`src/api/`) and API test modules (`tests/test_api_*.py`) into canonical baseline.
 - Executed full validation snapshot on `main`: `pytest` -> 62 passed.
