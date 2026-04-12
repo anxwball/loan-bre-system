@@ -2,7 +2,7 @@
 # Regenerate lock after edits with the same Python version used in CI (currently 3.13).
 # This file includes compiled packages (for example numpy and pandas), so avoid using a different
 # Python version when compiling hashes or selecting wheels.
-# python -m piptools compile --resolver=backtracking --generate-hashes --output-file requirements-ci.lock.txt requirements-ci.txt
+# pip-compile --generate-hashes --output-file requirements-ci.lock.txt requirements-ci.txt
 pytest==9.0.2
 numpy==2.4.4
 pandas==3.0.2

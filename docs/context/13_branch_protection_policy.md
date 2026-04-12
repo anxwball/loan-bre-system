@@ -2,7 +2,7 @@
 
 Scope:
 - This policy applies to `main` as the protected canonical branch.
-- Goal: prevent unreviewed changes and guarantee auditable merge gates.
+- Goal: guarantee auditable PR-based merge gates for all changes to `main`.
 
 Mandatory controls for `main`:
 1. Pull request is required for all merges and branch updates.
@@ -12,7 +12,6 @@ Mandatory controls for `main`:
 5. Bypass is disabled for all actors, including admins (default mode).
 6. All review conversations must be resolved before merge.
 7. Branch must be up to date before merge (strict required checks policy).
-8. Copilot reviews are advisory only.
 
 Official required checks (effective from 2026-04-05):
 1. `ci-pytest`
