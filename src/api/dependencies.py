@@ -10,7 +10,8 @@ from typing import Any, Generator
 from dotenv import load_dotenv
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
-from jose import JWTError, jwt
+import jwt as pyjwt
+from jwt import PyJWTError
 from passlib.context import CryptContext
 from sqlalchemy import Connection
 
@@ -135,7 +136,7 @@ def create_access_token(username: str, role: str) -> str:
         "exp": expires_at,
     }
 
-    return jwt.encode(payload, get_jwt_secret_key(), algorithm=JWT_ALGORITHM)
+    return pyjwt.encode(payload, get_jwt_secret_key(), algorithm=JWT_ALGORITHM)
 
 
 def get_current_user(token: str = Depends(oauth2_scheme)) -> dict[str, str]:
@@ -158,13 +159,13 @@ def get_current_user(token: str = Depends(oauth2_scheme)) -> dict[str, str]:
     )
 
     try:
-        payload: dict[str, Any] = jwt.decode(
+        payload: dict[str, Any] = pyjwt.decode(
             token,
             get_jwt_secret_key(),
             algorithms=[JWT_ALGORITHM],
             options={"verify_exp": False},
         )
-    except JWTError as exc:
+    except PyJWTError as exc:
         raise unauthorized from exc
 
     exp_value = payload.get("exp")
